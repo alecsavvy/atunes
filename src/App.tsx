@@ -6,15 +6,11 @@ export default function App() {
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
+  const [sortAsc, setSortAsc] = useState(true);
 
   const toggleLogin = () => {
-    if (loggedIn) {
-      setWallet(null);
-      setLoggedIn(false);
-    } else {
-      setWallet("0xAbc...1234");
-      setLoggedIn(true);
-    }
+    setLoggedIn(!loggedIn);
+    setWallet(loggedIn ? null : "0xAbc...1234");
   };
 
   const toggleTheme = () => {
@@ -27,34 +23,28 @@ export default function App() {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
+  const tracks = [
+    { id: 1, title: "Electric Feel", artist: "MGMT", duration: "3:49" },
+    { id: 2, title: "Nightcall", artist: "Kavinsky", duration: "4:17" },
+  ];
+
+  const fontClass = 'font-["Lucida_Grande","Tahoma",sans-serif]';
+
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 text-black dark:text-white font-sans">
+    <div className={`${fontClass} h-screen flex flex-col text-black`}>
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-zinc-200 dark:bg-zinc-700 shadow-md">
+      <div className="relative flex items-center justify-between px-4 py-2 border-b border-[#999] shadow-inner brushed-metal">
         <div className="flex items-center gap-2">
-          <button className="bg-zinc-300 dark:bg-zinc-600 p-2 rounded hover:bg-zinc-400 dark:hover:bg-zinc-500">
-            ⏮️
-          </button>
-          <button className="bg-zinc-300 dark:bg-zinc-600 p-2 rounded hover:bg-zinc-400 dark:hover:bg-zinc-500">
-            ▶️
-          </button>
-          <button className="bg-zinc-300 dark:bg-zinc-600 p-2 rounded hover:bg-zinc-400 dark:hover:bg-zinc-500">
-            ⏭️
-          </button>
+          <button className="aqua-button">⏮️</button>
+          <button className="aqua-button">▶️</button>
+          <button className="aqua-button">⏭️</button>
         </div>
-        <div className="text-center text-sm text-zinc-600 dark:text-zinc-300">
+        <div className="w-48 py-1 rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 text-center">
           🎵
         </div>
         <div className="flex items-center gap-2">
-          {wallet && (
-            <span className="text-xs text-green-600 dark:text-green-400">
-              {wallet}
-            </span>
-          )}
-          <button
-            onClick={toggleLogin}
-            className="bg-zinc-300 dark:bg-zinc-600 px-3 py-1 rounded hover:bg-zinc-400 dark:hover:bg-zinc-500 text-xs"
-          >
+          {wallet && <span className="text-xs text-green-700">{wallet}</span>}
+          <button onClick={toggleLogin} className="aqua-button text-xs px-3">
             {loggedIn ? "Logout" : "Connect Wallet"}
           </button>
         </div>
@@ -63,7 +53,7 @@ export default function App() {
       {/* Main layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 bg-zinc-100 dark:bg-zinc-800 border-r border-zinc-300 dark:border-zinc-700 p-4 overflow-y-auto flex flex-col">
+        <div className="w-64 border-r border-[#7fa6d9] p-4 overflow-y-auto flex flex-col brushed-metal">
           <div className="font-bold mb-4">Playlists</div>
           <ul className="space-y-2 text-sm mb-6">
             <li>🔥 Trending</li>
@@ -71,46 +61,33 @@ export default function App() {
             <li>🆕 New Releases</li>
             <li>🎧 Chill Vibes</li>
           </ul>
-          <div className="mt-auto pt-4 border-t border-zinc-300 dark:border-zinc-700">
-            <div className="w-16 h-16 bg-zinc-300 dark:bg-zinc-600 rounded overflow-hidden flex items-center justify-center mx-auto">
+          <div className="mt-auto pt-4 border-t border-[#aac6e6]">
+            <div className="w-16 h-16 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
               <span>🎵</span>
             </div>
-            <div className="text-center text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+            <div className="text-center text-xs text-[#5b7ca1] mt-2">
               Now Playing...
             </div>
           </div>
         </div>
 
-        {/* Content */}
+        {/* Main content */}
         <div className="flex-1 flex flex-col">
           {/* Filters */}
-          <div className="flex border-b border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-sm h-48">
-            {[
-              {
-                title: "Genres",
-                items: ["All", "Electronic", "Hip-Hop", "Rock"],
-              },
-              {
-                title: "Artists",
-                items: ["All", "MGMT", "Kavinsky", "Daft Punk"],
-              },
-              {
-                title: "Albums",
-                items: ["All", "Random Access Memories", "Drive OST"],
-              },
-            ].map((section, idx) => (
+          <div className="flex border-b border-[#999] text-sm h-48 brushed-metal">
+            {["Genres", "Artists", "Albums"].map((title, idx) => (
               <div
-                key={section.title}
+                key={title}
                 className={`w-1/3 ${
-                  idx < 2 ? "border-r border-zinc-300 dark:border-zinc-700" : ""
+                  idx < 2 ? "border-r border-[#bbb]" : ""
                 } overflow-y-auto p-2`}
               >
-                <div className="font-bold mb-2">{section.title}</div>
-                <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
-                  {section.items.map((item) => (
+                <div className="font-bold mb-2">{title}</div>
+                <ul className="flex flex-col divide-y divide-[#ccc]">
+                  {["All", "Option 1", "Option 2", "Option 3"].map((item) => (
                     <li
                       key={item}
-                      className="cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded px-2 py-1"
+                      className="cursor-pointer hover:bg-[#cce6ff] rounded px-2 py-1"
                     >
                       {item}
                     </li>
@@ -120,38 +97,32 @@ export default function App() {
             ))}
           </div>
 
-          {/* TrackList */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <table className="w-full text-sm p-4">
-              <thead className="text-zinc-500 dark:text-zinc-400">
+          {/* Track list */}
+          <div className="flex-1 overflow-auto brushed-metal">
+            <table className="w-full text-sm table-fixed border-collapse">
+              <thead className="bg-[#d0d0d0] text-left border-b border-[#aaa]">
                 <tr>
-                  <th className="text-left">Title</th>
-                  <th className="text-left">Artist</th>
-                  <th className="text-right">Duration</th>
+                  <th
+                    className="px-4 py-2 cursor-pointer"
+                    onClick={() => setSortAsc(!sortAsc)}
+                  >
+                    Title {sortAsc ? "↑" : "↓"}
+                  </th>
+                  <th className="px-4 py-2">Artist</th>
+                  <th className="px-4 py-2 text-right">Duration</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
-                {[
-                  {
-                    id: 1,
-                    title: "Electric Feel",
-                    artist: "MGMT",
-                    duration: "3:49",
-                  },
-                  {
-                    id: 2,
-                    title: "Nightcall",
-                    artist: "Kavinsky",
-                    duration: "4:17",
-                  },
-                ].map((track) => (
+              <tbody>
+                {tracks.map((track, i) => (
                   <tr
                     key={track.id}
-                    className="hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
+                    className={`$${
+                      i % 2 === 0 ? "bg-white/40" : "bg-white/20"
+                    } hover:bg-blue-200/70 cursor-pointer`}
                   >
-                    <td>{track.title}</td>
-                    <td>{track.artist}</td>
-                    <td className="text-right">{track.duration}</td>
+                    <td className="px-4 py-2">{track.title}</td>
+                    <td className="px-4 py-2">{track.artist}</td>
+                    <td className="px-4 py-2 text-right">{track.duration}</td>
                   </tr>
                 ))}
               </tbody>
@@ -161,11 +132,15 @@ export default function App() {
       </div>
 
       {/* Footer */}
-      <div className="relative h-12 bg-zinc-200 dark:bg-zinc-800 border-t border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="relative h-12 border-t border-[#999] flex items-center justify-center text-xs text-zinc-600 brushed-metal">
+        <div className="absolute left-4 flex gap-2">
+          <button className="aqua-button px-2 text-xs">🔁 Loop</button>
+          <button className="aqua-button px-2 text-xs">🔀 Shuffle</button>
+        </div>
         2 songs, 8:06 total, 17.9 MB
         <button
           onClick={toggleTheme}
-          className="absolute right-4 bottom-2 text-xs px-3 py-1 rounded bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400 dark:hover:bg-zinc-500"
+          className="absolute right-4 bottom-2 text-xs px-3 py-1 rounded-full bg-gradient-to-b from-[#f0faff] to-[#aad4ff] border border-[#3399ff] text-[#004080] shadow-inner hover:brightness-110"
         >
           Toggle Theme
         </button>
