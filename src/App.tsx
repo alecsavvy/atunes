@@ -24,8 +24,35 @@ export default function App() {
   }, [isDark]);
 
   const tracks = [
-    { id: 1, title: "Electric Feel", artist: "MGMT", duration: "3:49" },
-    { id: 2, title: "Nightcall", artist: "Kavinsky", duration: "4:17" },
+    {
+      id: 1,
+      title: "Electric Feel",
+      artist: "MGMT",
+      album: "Oracular Spectacular",
+      duration: "3:49",
+      genre: "Indie",
+    },
+    {
+      id: 2,
+      title: "Nightcall",
+      artist: "Kavinsky",
+      album: "Nightcall",
+      duration: "4:17",
+      genre: "Synthwave",
+    },
+  ];
+
+  const options = [
+    "Option 1",
+    "Option 2",
+    "Option 3",
+    "Option 4",
+    "Option 5",
+    "Option 6",
+    "Option 7",
+    "Option 8",
+    "Option 9",
+    "Option 10",
   ];
 
   const fontClass = 'font-["Lucida_Grande","Tahoma",sans-serif]';
@@ -33,13 +60,13 @@ export default function App() {
   return (
     <div className={`${fontClass} h-screen flex flex-col text-black`}>
       {/* Top bar */}
-      <div className="relative flex items-center justify-between px-4 py-2 border-b border-[#999] shadow-inner brushed-metal">
+      <div className="relative flex items-center justify-between px-4 py-6 border-b border-[#999] shadow-inner brushed-metal">
         <div className="flex items-center gap-2">
           <button className="aqua-button">⏮️</button>
           <button className="aqua-button">▶️</button>
           <button className="aqua-button">⏭️</button>
         </div>
-        <div className="w-48 py-1 rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 text-center">
+        <div className="w-150 py-4 rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 text-center">
           🎵
         </div>
         <div className="flex items-center gap-2">
@@ -54,12 +81,17 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-64 border-r border-[#7fa6d9] p-4 overflow-y-auto flex flex-col brushed-metal">
-          <div className="font-bold mb-4">Playlists</div>
+          <div className="font-bold mb-4">Source</div>
           <ul className="space-y-2 text-sm mb-6">
-            <li>🔥 Trending</li>
-            <li>❤️ Favorites</li>
-            <li>🆕 New Releases</li>
-            <li>🎧 Chill Vibes</li>
+            <li className="cursor-pointer hover:bg-[#cce6ff]">📚 Library</li>
+            <li className="cursor-pointer hover:bg-[#cce6ff]">🔥 Trending</li>
+            <li className="cursor-pointer hover:bg-[#cce6ff]">❤️ Reposts</li>
+            <li className="cursor-pointer hover:bg-[#cce6ff]">
+              🆕 New Releases
+            </li>
+            <li className="cursor-pointer hover:bg-[#cce6ff]">
+              🎧 Chill Vibes
+            </li>
           </ul>
           <div className="mt-auto pt-4 border-t border-[#aac6e6]">
             <div className="w-16 h-16 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
@@ -83,15 +115,17 @@ export default function App() {
                 } overflow-y-auto p-2`}
               >
                 <div className="font-bold mb-2">{title}</div>
-                <ul className="flex flex-col divide-y divide-[#ccc]">
-                  {["All", "Option 1", "Option 2", "Option 3"].map((item) => (
-                    <li
-                      key={item}
-                      className="cursor-pointer hover:bg-[#cce6ff] rounded px-2 py-1"
-                    >
-                      {item}
-                    </li>
-                  ))}
+                <ul className="flex flex-col divide-y bg-white/40">
+                  {[`All (${options.length} ${title})`, ...options].map(
+                    (item) => (
+                      <li
+                        key={item}
+                        className="cursor-pointer hover:bg-[#cce6ff] rounded px-2 py-1"
+                      >
+                        {item}
+                      </li>
+                    )
+                  )}
                 </ul>
               </div>
             ))}
@@ -109,7 +143,9 @@ export default function App() {
                     Title {sortAsc ? "↑" : "↓"}
                   </th>
                   <th className="px-4 py-2">Artist</th>
-                  <th className="px-4 py-2 text-right">Duration</th>
+                  <th className="px-4 py-2">Album</th>
+                  <th className="px-4 py-2 text-right">Time</th>
+                  <th className="px-4 py-2 text-right">Genre</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,7 +158,9 @@ export default function App() {
                   >
                     <td className="px-4 py-2">{track.title}</td>
                     <td className="px-4 py-2">{track.artist}</td>
+                    <td className="px-4 py-2">{track.album}</td>
                     <td className="px-4 py-2 text-right">{track.duration}</td>
+                    <td className="px-4 py-2 text-right">{track.genre}</td>
                   </tr>
                 ))}
               </tbody>
