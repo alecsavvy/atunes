@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AudiusGlyph from "./assets/audius_glyph.svg";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -60,14 +61,14 @@ export default function App() {
   return (
     <div className={`${fontClass} h-screen flex flex-col text-black`}>
       {/* Top bar */}
-      <div className="relative flex items-center justify-between px-4 py-6 border-b border-[#999] shadow-inner brushed-metal">
+      <div className="relative flex items-center justify-between px-4 py-4 border-b border-[#999] shadow-inner brushed-metal">
         <div className="flex items-center gap-2">
           <button className="aqua-button">⏮️</button>
           <button className="aqua-button">▶️</button>
           <button className="aqua-button">⏭️</button>
         </div>
         <div className="w-150 py-4 rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 text-center">
-          🎵
+          <img src={AudiusGlyph} alt="Audius" className="w-6 h-6 mx-auto" />
         </div>
         <div className="flex items-center gap-2">
           {wallet && <span className="text-xs text-green-700">{wallet}</span>}
