@@ -64,7 +64,7 @@ export default function App() {
             <img
               src={getUserState()?.profilePicture?.["_480x480"] || ""}
               alt="Profile"
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full border-2 border-black"
             />
           ) : (
             <Login />
