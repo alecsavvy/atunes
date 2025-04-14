@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore } from "./store";
-import { fetchTrendingTracks } from "./Sdk";
+import { fetchTrendingTracks, fetchUndergroundTracks } from "./Sdk";
 import Login from "./Login";
 
 export default function App() {
@@ -26,14 +26,11 @@ export default function App() {
   // Fetch trending tracks on startup
   useEffect(() => {
     fetchTrendingTracks();
+    fetchUndergroundTracks();
   }, []);
 
   // Fetch tracks when source changes
-  useEffect(() => {
-    if (filterState.selectedSource === "trending") {
-      fetchTrendingTracks();
-    }
-  }, [filterState.selectedSource]);
+  useEffect(() => {}, [filterState.selectedSource]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;

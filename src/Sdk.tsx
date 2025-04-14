@@ -10,7 +10,7 @@ export const audiusSdk: AudiusSdk = window.audiusSdk({
 const convertAudiusTrack = (
   track: Track,
   index: number,
-  source: "trending" | "favorites"
+  source: "trending" | "favorites" | "underground" | "reposts"
 ) => ({
   id: index + 1,
   title: track.title,
@@ -29,9 +29,22 @@ export const fetchTrendingTracks = async () => {
     const convertedTracks = (tracks ?? []).map((track, index) =>
       convertAudiusTrack(track, index, "trending")
     );
-    useStore.getState().setTracks(convertedTracks);
+    useStore.getState().setTracks("trending", convertedTracks);
   } catch (error) {
     console.error("Failed to fetch trending tracks:", error);
+  }
+};
+
+export const fetchUndergroundTracks = async () => {
+  try {
+    const { data: tracks } =
+      await audiusSdk.tracks.getUndergroundTrendingTracks();
+    const convertedTracks = (tracks ?? []).map((track, index) =>
+      convertAudiusTrack(track, index, "underground")
+    );
+    useStore.getState().setTracks("underground", convertedTracks);
+  } catch (error) {
+    console.error("Failed to fetch underground tracks:", error);
   }
 };
 
@@ -45,22 +58,25 @@ export const getFavorites = async (userId: string): Promise<Favorite[]> => {
 export const fetchFavoritesTracks = async (userId: string) => {
   try {
     const favorites = await getFavorites(userId);
+    console.log("favorites", favorites);
+
     const favoriteTracks = favorites.filter(
-      (favorite) => favorite.favoriteType === "track"
+      (favorite) => favorite.favoriteType === "SaveType.track"
     );
 
-    const tracks = await Promise.all(
-      favoriteTracks.map((favorite) =>
-        audiusSdk.tracks.getTrack({ trackId: favorite.favoriteItemId })
-      )
-    );
+    const { data: tracks } = await audiusSdk.tracks.getBulkTracks({
+      id: favoriteTracks.map((favorite) => favorite.favoriteItemId),
+    });
+
+    if (!tracks) {
+      return;
+    }
 
     const convertedTracks = tracks
-      .map((track) => track.data)
       .filter((track): track is Track => track !== undefined)
       .map((track, index) => convertAudiusTrack(track, index, "favorites"));
 
-    useStore.getState().setFavorites(convertedTracks);
+    useStore.getState().setTracks("favorites", convertedTracks);
   } catch (error) {
     console.error("Failed to fetch favorites:", error);
   }
