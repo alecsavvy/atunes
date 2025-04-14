@@ -1,5 +1,6 @@
 import { DecodedUserToken } from "@audius/sdk";
 import { create } from "zustand";
+import { getFavoritesTracks } from "./Sdk";
 
 export type Track = {
   id: number;
@@ -11,20 +12,20 @@ export type Track = {
   source:
     | "library"
     | "trending"
+    | "underground"
+    | "favorites"
     | "reposts"
-    | "newReleases"
-    | "chillVibes"
-    | "favorites";
+    | "playlists";
 };
 
 type FilterState = {
   selectedSource:
     | "library"
     | "trending"
+    | "underground"
+    | "favorites"
     | "reposts"
-    | "newReleases"
-    | "chillVibes"
-    | "favorites";
+    | "playlists";
   selectedGenre: string | null;
   selectedArtist: string | null;
   selectedAlbum: string | null;
@@ -35,6 +36,7 @@ type StoreState = {
   tracks: Track[];
   filterState: FilterState;
   userState: DecodedUserToken | null;
+  favorites: Track[];
   setSelectedSource: (source: FilterState["selectedSource"]) => void;
   setSelectedGenre: (genre: string | null) => void;
   setSelectedArtist: (artist: string | null) => void;
@@ -47,6 +49,7 @@ type StoreState = {
   setTracks: (tracks: Track[]) => void;
   getUserState: () => DecodedUserToken | null;
   setUserState: (userState: DecodedUserToken) => void;
+  setFavorites: (tracks: Track[]) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -76,18 +79,10 @@ export const useStore = create<StoreState>((set, get) => ({
       album: "Hurry Up, We're Dreaming",
       duration: "4:03",
       genre: "Electronic",
-      source: "newReleases",
-    },
-    {
-      id: 4,
-      title: "Genesis",
-      artist: "Grimes",
-      album: "Visions",
-      duration: "3:20",
-      genre: "Electronic",
-      source: "chillVibes",
+      source: "underground",
     },
   ],
+  favorites: [],
   filterState: {
     selectedSource: "library",
     selectedGenre: null,
@@ -120,10 +115,11 @@ export const useStore = create<StoreState>((set, get) => ({
       },
     })),
   getFilteredTracks: () => {
-    const { tracks, filterState } = get();
-    let filtered = tracks.filter(
-      (track) => track.source === filterState.selectedSource
-    );
+    const { tracks, filterState, favorites } = get();
+    let filtered =
+      filterState.selectedSource === "favorites"
+        ? favorites
+        : tracks.filter((track) => track.source === filterState.selectedSource);
 
     if (filterState.selectedGenre) {
       filtered = filtered.filter(
@@ -147,36 +143,62 @@ export const useStore = create<StoreState>((set, get) => ({
     });
   },
   getUniqueGenres: () => {
-    const { tracks, filterState } = get();
+    const { tracks, filterState, favorites } = get();
+    const sourceTracks =
+      filterState.selectedSource === "favorites" ? favorites : tracks;
     return [
       ...new Set(
-        tracks
+        sourceTracks
           .filter((track) => track.source === filterState.selectedSource)
           .map((track) => track.genre)
       ),
     ];
   },
   getUniqueArtists: () => {
-    const { tracks, filterState } = get();
+    const { tracks, filterState, favorites } = get();
+    const sourceTracks =
+      filterState.selectedSource === "favorites" ? favorites : tracks;
     return [
       ...new Set(
-        tracks
+        sourceTracks
           .filter((track) => track.source === filterState.selectedSource)
           .map((track) => track.artist)
       ),
     ];
   },
   getUniqueAlbums: () => {
-    const { tracks, filterState } = get();
+    const { tracks, filterState, favorites } = get();
+    const sourceTracks =
+      filterState.selectedSource === "favorites" ? favorites : tracks;
     return [
       ...new Set(
-        tracks
+        sourceTracks
           .filter((track) => track.source === filterState.selectedSource)
           .map((track) => track.album)
       ),
     ];
   },
   setTracks: (tracks) => set({ tracks }),
-  setUserState: (userState: DecodedUserToken) => set({ userState }),
+  setUserState: (userState: DecodedUserToken) => {
+    set({ userState });
+    // Pre-fetch favorites when user logs in
+    if (userState) {
+      getFavoritesTracks(userState.userId).then((tracks) => {
+        const convertedTracks = tracks.map((track, index) => ({
+          id: index + 1,
+          title: track.title,
+          artist: track.user.name,
+          album: track.albumBacklink?.playlistName || "no album",
+          duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
+            .toString()
+            .padStart(2, "0")}`,
+          genre: track.genre,
+          source: "favorites" as const,
+        }));
+        set({ favorites: convertedTracks });
+      });
+    }
+  },
   getUserState: () => get().userState,
+  setFavorites: (tracks) => set({ favorites: tracks }),
 }));

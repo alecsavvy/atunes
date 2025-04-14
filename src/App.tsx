@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore } from "./store";
-import { getTrendingTracks, getFavoritesTracks } from "./Sdk";
+import { getTrendingTracks } from "./Sdk";
 import Login from "./Login";
 
 export default function App() {
@@ -44,26 +44,6 @@ export default function App() {
             source: "trending" as const,
           }));
           setTracks(convertedTracks);
-        } else if (
-          filterState.selectedSource === "favorites" &&
-          getUserState()
-        ) {
-          const tracks = await getFavoritesTracks(getUserState()!.userId);
-          // Convert Audius tracks to our Track type
-          const convertedTracks = tracks.map((track, index) => ({
-            id: index + 1,
-            title: track.title,
-            artist: track.user.name,
-            album: track.albumBacklink?.playlistName || "no album",
-            duration: `${Math.floor(track.duration / 60)}:${(
-              track.duration % 60
-            )
-              .toString()
-              .padStart(2, "0")}`,
-            genre: track.genre,
-            source: "favorites" as const,
-          }));
-          setTracks(convertedTracks);
         }
       } catch (error) {
         console.error("Failed to fetch tracks:", error);
@@ -71,7 +51,7 @@ export default function App() {
     };
 
     fetchTracks();
-  }, [filterState.selectedSource, getUserState, setTracks]);
+  }, [filterState.selectedSource, setTracks]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -89,10 +69,13 @@ export default function App() {
     { id: "library", label: "📚 Library" },
     { id: "trending", label: "🔥 Trending" },
     { id: "underground", label: "🔊 Underground" },
-    { id: "favorites", label: "💖 Favorites" },
-    { id: "reposts", label: "❤️ Reposts" },
-    { id: "newReleases", label: "🆕 New Releases" },
-    { id: "chillVibes", label: "🎧 Chill Vibes" },
+    ...(getUserState()
+      ? [
+          { id: "favorites", label: "💖 Favorites" },
+          { id: "reposts", label: "❤️ Reposts" },
+          { id: "playlists", label: "🎵 Playlists" },
+        ]
+      : []),
   ];
 
   return (
