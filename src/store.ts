@@ -18,7 +18,8 @@ type FilterState = {
     | "underground"
     | "favorites"
     | "reposts"
-    | "playlists";
+    | "playlists"
+    | "uploads";
   selectedGenre: string | null;
   selectedArtist: string | null;
   selectedAlbum: string | null;
@@ -37,6 +38,7 @@ type StoreState = {
   favorites: Track[];
   reposts: Track[];
   playlists: Track[];
+  uploads: Track[];
   filterState: FilterState;
   userState: DecodedUserToken | null;
   sources: SourceConfig[];
@@ -63,6 +65,7 @@ export const useStore = create<StoreState>((set, get) => ({
   favorites: [],
   reposts: [],
   playlists: [],
+  uploads: [],
   filterState: {
     selectedSource: "library",
     selectedGenre: null,
@@ -164,6 +167,7 @@ export const useStore = create<StoreState>((set, get) => ({
       set({
         sources: [
           ...baseSources,
+          { id: "uploads" as const, label: "💿 Uploads" },
           { id: "favorites" as const, label: "💖 Favorites" },
           { id: "reposts" as const, label: "❤️ Reposts" },
           { id: "playlists" as const, label: "🎵 Playlists" },
