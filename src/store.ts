@@ -10,6 +10,11 @@ export type Track = {
   source: "library" | "trending" | "reposts" | "newReleases" | "chillVibes";
 };
 
+type UserState = {
+  handle: string | null;
+  error: string | null;
+};
+
 type FilterState = {
   selectedSource:
     | "library"
@@ -26,6 +31,7 @@ type FilterState = {
 type StoreState = {
   tracks: Track[];
   filterState: FilterState;
+  userState: UserState;
   setSelectedSource: (source: FilterState["selectedSource"]) => void;
   setSelectedGenre: (genre: string | null) => void;
   setSelectedArtist: (artist: string | null) => void;
@@ -36,6 +42,8 @@ type StoreState = {
   getUniqueArtists: () => string[];
   getUniqueAlbums: () => string[];
   setTracks: (tracks: Track[]) => void;
+  setUserHandle: (handle: string | null) => void;
+  setUserError: (error: string | null) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -83,6 +91,10 @@ export const useStore = create<StoreState>((set, get) => ({
     selectedArtist: null,
     selectedAlbum: null,
     sortAsc: true,
+  },
+  userState: {
+    handle: null,
+    error: null,
   },
   setSelectedSource: (source) =>
     set((state) => ({
@@ -165,4 +177,12 @@ export const useStore = create<StoreState>((set, get) => ({
     ];
   },
   setTracks: (tracks) => set({ tracks }),
+  setUserHandle: (handle) =>
+    set((state) => ({
+      userState: { ...state.userState, handle },
+    })),
+  setUserError: (error) =>
+    set((state) => ({
+      userState: { ...state.userState, error },
+    })),
 }));

@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore } from "./store";
-import { getTrendingTracks } from "./Sdk";
+import { getTrendingTracks, initializeOAuth, renderOAuthButton } from "./Sdk";
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [wallet, setWallet] = useState<string | null>(null);
+  const buttonDivRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
+  const [isButtonRendered, setIsButtonRendered] = useState(false);
 
   const {
     filterState,
@@ -22,6 +22,9 @@ export default function App() {
     getUniqueArtists,
     getUniqueAlbums,
     setTracks,
+    userState,
+    setUserHandle,
+    setUserError,
   } = useStore();
 
   useEffect(() => {
@@ -49,10 +52,25 @@ export default function App() {
     fetchTrendingTracks();
   }, [setTracks]);
 
-  const toggleLogin = () => {
-    setLoggedIn(!loggedIn);
-    setWallet(loggedIn ? null : "0xAbc...1234");
-  };
+  useEffect(() => {
+    initializeOAuth(
+      (profile) => {
+        setUserHandle(profile.handle);
+        setUserError(null);
+      },
+      (error) => {
+        setUserError(error);
+        setUserHandle(null);
+      }
+    );
+  }, [setUserHandle, setUserError]);
+
+  useEffect(() => {
+    if (buttonDivRef.current && !isButtonRendered) {
+      renderOAuthButton(buttonDivRef.current);
+      setIsButtonRendered(true);
+    }
+  }, [isButtonRendered]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -89,10 +107,13 @@ export default function App() {
           <img src={AudiusGlyph} alt="Audius" className="w-6 h-6 mx-auto" />
         </div>
         <div className="flex items-center gap-2">
-          {wallet && <span className="text-xs text-green-700">{wallet}</span>}
-          <button onClick={toggleLogin} className="aqua-button text-xs px-3">
-            {loggedIn ? "Logout" : "Connect Wallet"}
-          </button>
+          {userState.handle && (
+            <span className="text-xs text-green-700">@{userState.handle}</span>
+          )}
+          <div ref={buttonDivRef} className="min-w-[120px]" />
+          {userState.error && (
+            <div className="text-xs text-red-700">{userState.error}</div>
+          )}
         </div>
       </div>
 
