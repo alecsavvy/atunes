@@ -115,15 +115,17 @@ export default function App() {
                 key={title}
                 className={`w-1/3 ${
                   idx < 2 ? "border-r border-[#bbb]" : ""
-                } overflow-y-auto p-2`}
+                } overflow-y-auto`}
               >
-                <div className="font-bold mb-2">{title}</div>
-                <ul className="flex flex-col divide-y bg-white/40">
+                <div className="bg-gradient-to-b from-[#f2f2f2] to-[#cfcfcf] border-b border-[#999] box-shadow-[inset_0_-1px_0_#aaa] px-4 py-2 font-bold">
+                  {title}
+                </div>
+                <ul className="flex flex-col">
                   {[`All (${options.length} ${title})`, ...options].map(
                     (item) => (
                       <li
                         key={item}
-                        className="cursor-pointer hover:bg-[#cce6ff] rounded px-2 py-1"
+                        className="cursor-pointer px-4 py-2 hover:bg-blue-200/70"
                       >
                         {item}
                       </li>
