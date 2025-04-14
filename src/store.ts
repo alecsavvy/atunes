@@ -17,7 +17,6 @@ type FilterState = {
     | "trending"
     | "underground"
     | "favorites"
-    | "reposts"
     | "playlists"
     | "uploads";
   selectedGenre: string | null;
@@ -36,7 +35,6 @@ type StoreState = {
   trending: Track[];
   underground: Track[];
   favorites: Track[];
-  reposts: Track[];
   playlists: Track[];
   uploads: Track[];
   filterState: FilterState;
@@ -63,7 +61,6 @@ export const useStore = create<StoreState>((set, get) => ({
   trending: [],
   underground: [],
   favorites: [],
-  reposts: [],
   playlists: [],
   uploads: [],
   filterState: {
@@ -169,7 +166,6 @@ export const useStore = create<StoreState>((set, get) => ({
           ...baseSources,
           { id: "uploads" as const, label: "💿 Uploads" },
           { id: "favorites" as const, label: "💖 Favorites" },
-          { id: "reposts" as const, label: "❤️ Reposts" },
           { id: "playlists" as const, label: "🎵 Playlists" },
         ],
       });
