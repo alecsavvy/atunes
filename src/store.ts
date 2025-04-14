@@ -1,3 +1,4 @@
+import { DecodedUserToken } from "@audius/sdk";
 import { create } from "zustand";
 
 export type Track = {
@@ -8,11 +9,6 @@ export type Track = {
   duration: string;
   genre: string;
   source: "library" | "trending" | "reposts" | "newReleases" | "chillVibes";
-};
-
-type UserState = {
-  handle: string | null;
-  error: string | null;
 };
 
 type FilterState = {
@@ -31,7 +27,7 @@ type FilterState = {
 type StoreState = {
   tracks: Track[];
   filterState: FilterState;
-  userState: UserState;
+  userState: DecodedUserToken | null;
   setSelectedSource: (source: FilterState["selectedSource"]) => void;
   setSelectedGenre: (genre: string | null) => void;
   setSelectedArtist: (artist: string | null) => void;
@@ -42,8 +38,8 @@ type StoreState = {
   getUniqueArtists: () => string[];
   getUniqueAlbums: () => string[];
   setTracks: (tracks: Track[]) => void;
-  setUserHandle: (handle: string | null) => void;
-  setUserError: (error: string | null) => void;
+  getUserState: () => DecodedUserToken | null;
+  setUserState: (userState: DecodedUserToken) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -92,10 +88,7 @@ export const useStore = create<StoreState>((set, get) => ({
     selectedAlbum: null,
     sortAsc: true,
   },
-  userState: {
-    handle: null,
-    error: null,
-  },
+  userState: null,
   setSelectedSource: (source) =>
     set((state) => ({
       filterState: { ...state.filterState, selectedSource: source },
@@ -177,12 +170,6 @@ export const useStore = create<StoreState>((set, get) => ({
     ];
   },
   setTracks: (tracks) => set({ tracks }),
-  setUserHandle: (handle) =>
-    set((state) => ({
-      userState: { ...state.userState, handle },
-    })),
-  setUserError: (error) =>
-    set((state) => ({
-      userState: { ...state.userState, error },
-    })),
+  setUserState: (userState: DecodedUserToken) => set({ userState }),
+  getUserState: () => get().userState,
 }));
