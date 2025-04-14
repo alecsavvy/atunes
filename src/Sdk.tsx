@@ -82,6 +82,16 @@ export const fetchFavoritesTracks = async (userId: string) => {
   }
 };
 
+export const fetchUploads = async (userId: string) => {
+  const { data: tracks } = await audiusSdk.full.users.getTracksByUser({
+    id: userId,
+  });
+  const convertedTracks = (tracks ?? []).map((track, index) =>
+    convertAudiusTrack(track, index, "uploads")
+  );
+  useStore.getState().setTracks("uploads", convertedTracks);
+};
+
 export const fetchPlaylists = async (
   userId: string
 ): Promise<PlaylistFullWithoutTracks[]> => {

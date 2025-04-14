@@ -1,6 +1,10 @@
 import { DecodedUserToken } from "@audius/sdk";
 import { create } from "zustand";
-import { fetchFavoritesTracks, fetchPlaylistsByUser } from "./Sdk";
+import {
+  fetchFavoritesTracks,
+  fetchPlaylistsByUser,
+  fetchUploads,
+} from "./Sdk";
 
 export type Track = {
   id: number;
@@ -148,6 +152,7 @@ export const useStore = create<StoreState>((set, get) => ({
     if (userState) {
       fetchFavoritesTracks(userState.userId);
       fetchPlaylistsByUser(userState.userId);
+      fetchUploads(userState.userId);
     }
     get().updateSources(userState);
   },
