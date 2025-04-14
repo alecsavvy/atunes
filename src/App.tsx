@@ -117,7 +117,7 @@ export default function App() {
                   idx < 2 ? "border-r border-[#bbb]" : ""
                 } overflow-y-auto`}
               >
-                <div className="bg-gradient-to-b from-[#f2f2f2] to-[#cfcfcf] border-b border-[#999] box-shadow-[inset_0_-1px_0_#aaa] px-4 py-2 font-bold">
+                <div className="filter-title bg-gradient-to-b from-[#f2f2f2] to-[#cfcfcf] border-b border-[#999] box-shadow-[inset_0_-1px_0_#aaa] px-4 py-2 font-bold">
                   {title}
                 </div>
                 <ul className="flex flex-col">
