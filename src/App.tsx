@@ -59,7 +59,9 @@ export default function App() {
   const fontClass = 'font-["Lucida_Grande","Tahoma",sans-serif]';
 
   return (
-    <div className={`${fontClass} h-screen flex flex-col text-black`}>
+    <div
+      className={`${fontClass} h-screen flex flex-col ${isDark ? "dark" : ""}`}
+    >
       {/* Top bar */}
       <div className="relative flex items-center justify-between px-4 py-4 border-b border-[#999] shadow-inner brushed-metal">
         <div className="flex items-center gap-2">
@@ -179,9 +181,9 @@ export default function App() {
         2 songs, 8:06 total, 17.9 MB
         <button
           onClick={toggleTheme}
-          className="absolute right-4 bottom-2 text-xs px-3 py-1 rounded-full bg-gradient-to-b from-[#f0faff] to-[#aad4ff] border border-[#3399ff] text-[#004080] shadow-inner hover:brightness-110"
+          className="absolute right-4 bottom-2 text-xs px-3 py-1 rounded-full aqua-button"
         >
-          Toggle Theme
+          {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
         </button>
       </div>
     </div>
