@@ -53,16 +53,6 @@ type StoreState = {
       | "playlists",
     tracks: Track[]
   ) => void;
-  addTracks: (
-    source:
-      | "library"
-      | "trending"
-      | "underground"
-      | "favorites"
-      | "reposts"
-      | "playlists",
-    tracks: Track[]
-  ) => void;
   getUserState: () => DecodedUserToken | null;
   setUserState: (userState: DecodedUserToken) => void;
 };
@@ -148,8 +138,6 @@ export const useStore = create<StoreState>((set, get) => ({
     return [...new Set(sourceTracks.map((track) => track.album))];
   },
   setTracks: (source, tracks) => set((state) => ({ [source]: tracks })),
-  addTracks: (source, tracks) =>
-    set((state) => ({ [source]: [...state[source], ...tracks] })),
   setUserState: (userState: DecodedUserToken) => {
     set({ userState });
     // Pre-fetch favorites when user logs in
