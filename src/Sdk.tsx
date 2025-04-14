@@ -1,4 +1,10 @@
-import { AudiusSdk, Favorite, Track } from "@audius/sdk";
+import {
+  Activity,
+  ActivityItemTypeEnum,
+  AudiusSdk,
+  Favorite,
+  Track,
+} from "@audius/sdk";
 import { useStore } from "./store";
 
 const audiusSdkApiKey = "832c79b4c0a3da1affae305269a9eb8305858158";

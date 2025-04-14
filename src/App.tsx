@@ -21,6 +21,7 @@ export default function App() {
     getUniqueArtists,
     getUniqueAlbums,
     getUserState,
+    sources,
   } = useStore();
 
   // Fetch trending tracks on startup
@@ -43,19 +44,6 @@ export default function App() {
   }, [isDark]);
 
   const fontClass = 'font-["Lucida_Grande","Tahoma",sans-serif]';
-
-  const sources = [
-    { id: "library", label: "📚 Library" },
-    { id: "trending", label: "🔥 Trending" },
-    { id: "underground", label: "🔊 Underground" },
-    ...(getUserState()
-      ? [
-          { id: "favorites", label: "💖 Favorites" },
-          { id: "reposts", label: "❤️ Reposts" },
-          { id: "playlists", label: "🎵 Playlists" },
-        ]
-      : []),
-  ];
 
   return (
     <div
@@ -96,7 +84,7 @@ export default function App() {
                 className={`cursor-pointer hover:bg-[#cce6ff] ${
                   filterState.selectedSource === source.id ? "bg-[#cce6ff]" : ""
                 }`}
-                onClick={() => setSelectedSource(source.id as any)}
+                onClick={() => setSelectedSource(source.id)}
               >
                 {source.label}
               </li>

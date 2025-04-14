@@ -25,6 +25,11 @@ type FilterState = {
   sortAsc: boolean;
 };
 
+type SourceConfig = {
+  id: FilterState["selectedSource"];
+  label: string;
+};
+
 type StoreState = {
   library: Track[];
   trending: Track[];
@@ -34,6 +39,7 @@ type StoreState = {
   playlists: Track[];
   filterState: FilterState;
   userState: DecodedUserToken | null;
+  sources: SourceConfig[];
   setSelectedSource: (source: FilterState["selectedSource"]) => void;
   setSelectedGenre: (genre: string | null) => void;
   setSelectedArtist: (artist: string | null) => void;
@@ -55,6 +61,8 @@ type StoreState = {
   ) => void;
   getUserState: () => DecodedUserToken | null;
   setUserState: (userState: DecodedUserToken) => void;
+  setSources: (sources: SourceConfig[]) => void;
+  updateSources: (userState: DecodedUserToken | null) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -72,6 +80,11 @@ export const useStore = create<StoreState>((set, get) => ({
     sortAsc: true,
   },
   userState: null,
+  sources: [
+    { id: "library" as const, label: "📚 Library" },
+    { id: "trending" as const, label: "🔥 Trending" },
+    { id: "underground" as const, label: "🔊 Underground" },
+  ],
   setSelectedSource: (source) =>
     set((state) => ({
       filterState: { ...state.filterState, selectedSource: source },
@@ -137,13 +150,35 @@ export const useStore = create<StoreState>((set, get) => ({
     const sourceTracks = get()[filterState.selectedSource];
     return [...new Set(sourceTracks.map((track) => track.album))];
   },
-  setTracks: (source, tracks) => set((state) => ({ [source]: tracks })),
+  setTracks: (source, tracks) => set((_state) => ({ [source]: tracks })),
   setUserState: (userState: DecodedUserToken) => {
     set({ userState });
     // Pre-fetch favorites when user logs in
     if (userState) {
       fetchFavoritesTracks(userState.userId);
     }
+    get().updateSources(userState);
   },
   getUserState: () => get().userState,
+  setSources: (sources) => set({ sources }),
+  updateSources: (userState) => {
+    const baseSources = [
+      { id: "library" as const, label: "📚 Library" },
+      { id: "trending" as const, label: "🔥 Trending" },
+      { id: "underground" as const, label: "🔊 Underground" },
+    ];
+
+    if (userState) {
+      set({
+        sources: [
+          ...baseSources,
+          { id: "favorites" as const, label: "💖 Favorites" },
+          { id: "reposts" as const, label: "❤️ Reposts" },
+          { id: "playlists" as const, label: "🎵 Playlists" },
+        ],
+      });
+    } else {
+      set({ sources: baseSources });
+    }
+  },
 }));
