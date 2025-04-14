@@ -1,10 +1,9 @@
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { useStore } from "./store";
 import { audiusSdk } from "./Sdk";
 
 export default function Login() {
-  const buttonDivRef = useRef<HTMLDivElement>(null);
-  const { setUserState, getUserState } = useStore();
+  const { setUserState } = useStore();
 
   async function loadOauth() {
     audiusSdk.oauth?.init({
@@ -16,37 +15,18 @@ export default function Login() {
         console.error("OAuth error:", error);
       },
     });
-
-    // Only render the button if we're not logged in
-    if (!getUserState()) {
-      audiusSdk.oauth?.renderButton({
-        element: buttonDivRef.current!,
-        scope: "read",
-        buttonOptions: {
-          customText: "Login",
-        },
-      });
-    }
   }
 
   useEffect(() => {
     loadOauth();
   }, []);
 
-  const userState = getUserState();
-
-  if (!userState) {
-    return <div ref={buttonDivRef} />;
-  }
-
   return (
-    <div className="flex items-center gap-2">
-      <img
-        src={userState.profilePicture?.["_480x480"] || ""}
-        alt="Profile"
-        className="w-8 h-8 rounded-full"
-      />
-      <p className="text-sm">{userState.handle}</p>
-    </div>
+    <button
+      onClick={() => audiusSdk.oauth?.login({ scope: "read" })}
+      className="cursor-pointer px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+    >
+      Login with Audius
+    </button>
   );
 }
