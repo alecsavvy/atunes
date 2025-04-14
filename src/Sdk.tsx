@@ -87,7 +87,6 @@ export const fetchPlaylists = async (
 ): Promise<PlaylistFullWithoutTracks[]> => {
   const { data: playlists } = await audiusSdk.full.users.getPlaylistsByUser({
     id: userId,
-    userId: userId,
   });
   return playlists ?? [];
 };
