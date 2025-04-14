@@ -15,7 +15,7 @@ const convertAudiusTrack = (
   id: index + 1,
   title: track.title,
   artist: track.user.name,
-  album: track.albumBacklink?.playlistName || "no album",
+  album: track.albumBacklink?.playlistName || "<no album>",
   duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
     .toString()
     .padStart(2, "0")}`,
