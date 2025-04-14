@@ -8,7 +8,13 @@ export type Track = {
   album: string;
   duration: string;
   genre: string;
-  source: "library" | "trending" | "reposts" | "newReleases" | "chillVibes";
+  source:
+    | "library"
+    | "trending"
+    | "reposts"
+    | "newReleases"
+    | "chillVibes"
+    | "favorites";
 };
 
 type FilterState = {
@@ -17,7 +23,8 @@ type FilterState = {
     | "trending"
     | "reposts"
     | "newReleases"
-    | "chillVibes";
+    | "chillVibes"
+    | "favorites";
   selectedGenre: string | null;
   selectedArtist: string | null;
   selectedAlbum: string | null;
