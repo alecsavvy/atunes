@@ -1,6 +1,6 @@
 import { DecodedUserToken } from "@audius/sdk";
 import { create } from "zustand";
-import { fetchFavoritesTracks } from "./Sdk";
+import { fetchFavoritesTracks, fetchPlaylistsByUser } from "./Sdk";
 
 export type Track = {
   id: number;
@@ -49,16 +49,7 @@ type StoreState = {
   getUniqueGenres: () => string[];
   getUniqueArtists: () => string[];
   getUniqueAlbums: () => string[];
-  setTracks: (
-    source:
-      | "library"
-      | "trending"
-      | "underground"
-      | "favorites"
-      | "reposts"
-      | "playlists",
-    tracks: Track[]
-  ) => void;
+  setTracks: (source: string, tracks: Track[]) => void;
   getUserState: () => DecodedUserToken | null;
   setUserState: (userState: DecodedUserToken) => void;
   setSources: (sources: SourceConfig[]) => void;
@@ -156,6 +147,7 @@ export const useStore = create<StoreState>((set, get) => ({
     // Pre-fetch favorites when user logs in
     if (userState) {
       fetchFavoritesTracks(userState.userId);
+      fetchPlaylistsByUser(userState.userId);
     }
     get().updateSources(userState);
   },

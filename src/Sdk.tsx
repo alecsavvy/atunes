@@ -1,11 +1,9 @@
-import {
-  Activity,
-  ActivityItemTypeEnum,
-  AudiusSdk,
-  Favorite,
-  Track,
-} from "@audius/sdk";
+import { AudiusSdk, Favorite, Track } from "@audius/sdk";
 import { useStore } from "./store";
+import {
+  PlaylistFullWithoutTracks,
+  TrackFull,
+} from "@audius/sdk/dist/sdk/api/generated/full";
 
 const audiusSdkApiKey = "832c79b4c0a3da1affae305269a9eb8305858158";
 
@@ -82,4 +80,37 @@ export const fetchFavoritesTracks = async (userId: string) => {
   } catch (error) {
     console.error("Failed to fetch favorites:", error);
   }
+};
+
+export const fetchPlaylists = async (
+  userId: string
+): Promise<PlaylistFullWithoutTracks[]> => {
+  const { data: playlists } = await audiusSdk.full.users.getPlaylistsByUser({
+    id: userId,
+    userId: userId,
+  });
+  return playlists ?? [];
+};
+
+export const fetchPlaylistsTracks = async (
+  playlistId: string
+): Promise<TrackFull[]> => {
+  const { data: tracks } = await audiusSdk.full.playlists.getPlaylistTracks({
+    playlistId: playlistId,
+  });
+  return tracks ?? [];
+};
+
+export const fetchPlaylistsByUser = async (userId: string) => {
+  const playlists = await fetchPlaylists(userId);
+  Promise.all(
+    playlists.map(async (playlist) => {
+      const playlistTracks = await fetchPlaylistsTracks(playlist.id);
+      // convert playlist tracks to tracks
+      const convertedTracks = playlistTracks.map((track, index) =>
+        convertAudiusTrack(track, index, "playlists")
+      );
+      useStore.getState().setTracks(playlist.playlistName, convertedTracks);
+    })
+  );
 };
