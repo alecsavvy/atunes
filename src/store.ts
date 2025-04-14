@@ -35,6 +35,7 @@ type StoreState = {
   getUniqueGenres: () => string[];
   getUniqueArtists: () => string[];
   getUniqueAlbums: () => string[];
+  setTracks: (tracks: Track[]) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -163,4 +164,5 @@ export const useStore = create<StoreState>((set, get) => ({
       ),
     ];
   },
+  setTracks: (tracks) => set({ tracks }),
 }));

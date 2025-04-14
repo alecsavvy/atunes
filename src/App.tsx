@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore } from "./store";
+import { getTrendingTracks } from "./Sdk";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -20,7 +21,33 @@ export default function App() {
     getUniqueGenres,
     getUniqueArtists,
     getUniqueAlbums,
+    setTracks,
   } = useStore();
+
+  useEffect(() => {
+    const fetchTrendingTracks = async () => {
+      try {
+        const tracks = await getTrendingTracks();
+        // Convert Audius tracks to our Track type
+        const convertedTracks = tracks.map((track, index) => ({
+          id: index + 1,
+          title: track.title,
+          artist: track.user.name,
+          album: track.albumBacklink?.playlistName || "no album",
+          duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
+            .toString()
+            .padStart(2, "0")}`,
+          genre: track.genre,
+          source: "trending" as const,
+        }));
+        setTracks(convertedTracks);
+      } catch (error) {
+        console.error("Failed to fetch trending tracks:", error);
+      }
+    };
+
+    fetchTrendingTracks();
+  }, [setTracks]);
 
   const toggleLogin = () => {
     setLoggedIn(!loggedIn);
