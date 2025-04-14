@@ -7,11 +7,7 @@ export const audiusSdk: AudiusSdk = window.audiusSdk({
   apiKey: audiusSdkApiKey,
 });
 
-const convertAudiusTrack = (
-  track: Track,
-  index: number,
-  source: "trending" | "favorites" | "underground" | "reposts"
-) => ({
+const convertAudiusTrack = (track: Track, index: number, source: string) => ({
   id: index + 1,
   title: track.title,
   artist: track.user.name,
