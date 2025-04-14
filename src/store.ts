@@ -53,35 +53,7 @@ type StoreState = {
 };
 
 export const useStore = create<StoreState>((set, get) => ({
-  tracks: [
-    {
-      id: 1,
-      title: "Electric Feel",
-      artist: "MGMT",
-      album: "Oracular Spectacular",
-      duration: "3:49",
-      genre: "Indie",
-      source: "library",
-    },
-    {
-      id: 2,
-      title: "Nightcall",
-      artist: "Kavinsky",
-      album: "Nightcall",
-      duration: "4:17",
-      genre: "Synthwave",
-      source: "trending",
-    },
-    {
-      id: 3,
-      title: "Midnight City",
-      artist: "M83",
-      album: "Hurry Up, We're Dreaming",
-      duration: "4:03",
-      genre: "Electronic",
-      source: "underground",
-    },
-  ],
+  tracks: [],
   favorites: [],
   filterState: {
     selectedSource: "library",
