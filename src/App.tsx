@@ -21,6 +21,7 @@ export default function App() {
     getUniqueArtists,
     getUniqueAlbums,
     setTracks,
+    getUserState,
   } = useStore();
 
   useEffect(() => {
@@ -83,7 +84,15 @@ export default function App() {
           <img src={AudiusGlyph} alt="Audius" className="w-6 h-6 mx-auto" />
         </div>
         <div className="flex items-center gap-2">
-          <Login />
+          {getUserState() ? (
+            <img
+              src={getUserState()?.profilePicture?.["_480x480"] || ""}
+              alt="Profile"
+              className="w-10 h-10 rounded-full"
+            />
+          ) : (
+            <Login />
+          )}
         </div>
       </div>
 
@@ -214,6 +223,7 @@ export default function App() {
           <button className="aqua-button px-2 text-xs">🔁 Loop</button>
           <button className="aqua-button px-2 text-xs">🔀 Shuffle</button>
         </div>
+        {getUserState() && `${getUserState()?.handle} - `}
         {getFilteredTracks().length} songs,{" "}
         {getFilteredTracks().reduce((acc, track) => {
           const [minutes, seconds] = track.duration.split(":").map(Number);

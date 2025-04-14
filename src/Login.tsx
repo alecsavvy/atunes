@@ -11,10 +11,6 @@ export default function Login() {
       successCallback: (profile) => {
         console.log("Profile received:", profile);
         setUserState(profile);
-        // Clean up the OAuth button
-        if (buttonDivRef.current) {
-          buttonDivRef.current.innerHTML = "";
-        }
       },
       errorCallback: (error) => {
         console.error("OAuth error:", error);
@@ -26,6 +22,9 @@ export default function Login() {
       audiusSdk.oauth?.renderButton({
         element: buttonDivRef.current!,
         scope: "read",
+        buttonOptions: {
+          customText: "Login",
+        },
       });
     }
   }
