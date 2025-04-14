@@ -1,6 +1,6 @@
 import { DecodedUserToken } from "@audius/sdk";
 import { create } from "zustand";
-import { getFavoritesTracks } from "./Sdk";
+import { fetchFavoritesTracks } from "./Sdk";
 
 export type Track = {
   id: number;
@@ -155,20 +155,7 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ userState });
     // Pre-fetch favorites when user logs in
     if (userState) {
-      getFavoritesTracks(userState.userId).then((tracks) => {
-        const convertedTracks = tracks.map((track, index) => ({
-          id: index + 1,
-          title: track.title,
-          artist: track.user.name,
-          album: track.albumBacklink?.playlistName || "no album",
-          duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
-            .toString()
-            .padStart(2, "0")}`,
-          genre: track.genre,
-          source: "favorites" as const,
-        }));
-        set({ favorites: convertedTracks });
-      });
+      fetchFavoritesTracks(userState.userId);
     }
   },
   getUserState: () => get().userState,
