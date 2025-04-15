@@ -22,7 +22,8 @@ type FilterState = {
     | "underground"
     | "favorites"
     | "playlists"
-    | "uploads";
+    | "uploads"
+    | string;
   selectedGenre: string | null;
   selectedArtist: string | null;
   selectedAlbum: string | null;
@@ -30,8 +31,9 @@ type FilterState = {
 };
 
 type SourceConfig = {
-  id: FilterState["selectedSource"];
+  id: FilterState["selectedSource"] | string;
   label: string;
+  type: "static" | "dynamic";
 };
 
 type StoreState = {
@@ -41,6 +43,13 @@ type StoreState = {
   favorites: Track[];
   playlists: Track[];
   uploads: Track[];
+  [key: string]:
+    | Track[]
+    | FilterState
+    | DecodedUserToken
+    | null
+    | SourceConfig[]
+    | ((...args: any[]) => any);
   filterState: FilterState;
   userState: DecodedUserToken | null;
   sources: SourceConfig[];
@@ -58,6 +67,8 @@ type StoreState = {
   setUserState: (userState: DecodedUserToken) => void;
   setSources: (sources: SourceConfig[]) => void;
   updateSources: (userState: DecodedUserToken | null) => void;
+  addDynamicSource: (source: SourceConfig) => void;
+  removeDynamicSource: (sourceId: string) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -76,9 +87,13 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   userState: null,
   sources: [
-    { id: "library" as const, label: "📚 Library" },
-    { id: "trending" as const, label: "🔥 Trending" },
-    { id: "underground" as const, label: "🔊 Underground" },
+    { id: "library" as const, label: "📚 Library", type: "static" as const },
+    { id: "trending" as const, label: "🔥 Trending", type: "static" as const },
+    {
+      id: "underground" as const,
+      label: "🔊 Underground",
+      type: "static" as const,
+    },
   ],
   setSelectedSource: (source) =>
     set((state) => ({
@@ -105,7 +120,7 @@ export const useStore = create<StoreState>((set, get) => ({
     })),
   getFilteredTracks: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource];
+    const sourceTracks = get()[filterState.selectedSource] as Track[];
 
     let filtered = sourceTracks;
 
@@ -132,17 +147,17 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   getUniqueGenres: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource];
+    const sourceTracks = get()[filterState.selectedSource] as Track[];
     return [...new Set(sourceTracks.map((track) => track.genre))];
   },
   getUniqueArtists: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource];
+    const sourceTracks = get()[filterState.selectedSource] as Track[];
     return [...new Set(sourceTracks.map((track) => track.artist))];
   },
   getUniqueAlbums: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource];
+    const sourceTracks = get()[filterState.selectedSource] as Track[];
     return [...new Set(sourceTracks.map((track) => track.album))];
   },
   setTracks: (source, tracks) => set((_state) => ({ [source]: tracks })),
@@ -160,22 +175,50 @@ export const useStore = create<StoreState>((set, get) => ({
   setSources: (sources) => set({ sources }),
   updateSources: (userState) => {
     const baseSources = [
-      { id: "library" as const, label: "📚 Library" },
-      { id: "trending" as const, label: "🔥 Trending" },
-      { id: "underground" as const, label: "🔊 Underground" },
+      { id: "library" as const, label: "📚 Library", type: "static" as const },
+      {
+        id: "trending" as const,
+        label: "🔥 Trending",
+        type: "static" as const,
+      },
+      {
+        id: "underground" as const,
+        label: "🔊 Underground",
+        type: "static" as const,
+      },
     ];
 
     if (userState) {
       set({
         sources: [
           ...baseSources,
-          { id: "uploads" as const, label: "💿 Uploads" },
-          { id: "favorites" as const, label: "💖 Favorites" },
-          { id: "playlists" as const, label: "🎵 Playlists" },
+          {
+            id: "uploads" as const,
+            label: "💿 Uploads",
+            type: "static" as const,
+          },
+          {
+            id: "favorites" as const,
+            label: "💖 Favorites",
+            type: "static" as const,
+          },
+          {
+            id: "playlists" as const,
+            label: "🎵 Playlists",
+            type: "static" as const,
+          },
         ],
       });
     } else {
       set({ sources: baseSources });
     }
   },
+  addDynamicSource: (source) =>
+    set((state) => ({
+      sources: [...state.sources, source],
+    })),
+  removeDynamicSource: (sourceId) =>
+    set((state) => ({
+      sources: state.sources.filter((source) => source.id !== sourceId),
+    })),
 }));

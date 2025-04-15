@@ -104,22 +104,29 @@ export const fetchPlaylists = async (
 export const fetchPlaylistsTracks = async (
   playlistId: string
 ): Promise<TrackFull[]> => {
-  const { data: tracks } = await audiusSdk.full.playlists.getPlaylistTracks({
+  const { data: playlists } = await audiusSdk.full.playlists.getPlaylistTracks({
     playlistId: playlistId,
   });
-  return tracks ?? [];
+  return playlists ?? [];
 };
 
 export const fetchPlaylistsByUser = async (userId: string) => {
   const playlists = await fetchPlaylists(userId);
   Promise.all(
     playlists.map(async (playlist) => {
+      const playlistSource = `playlist-${playlist.id}`;
       const playlistTracks = await fetchPlaylistsTracks(playlist.id);
       // convert playlist tracks to tracks
       const convertedTracks = playlistTracks.map((track, index) =>
-        convertAudiusTrack(track, index, "playlists")
+        convertAudiusTrack(track, index, playlistSource)
       );
-      useStore.getState().setTracks(playlist.playlistName, convertedTracks);
+      useStore.getState().setTracks(playlistSource, convertedTracks);
+      // Add dynamic source for this playlist
+      useStore.getState().addDynamicSource({
+        id: playlistSource,
+        label: `🎵 ${playlist.playlistName}`,
+        type: "dynamic",
+      });
     })
   );
 };
