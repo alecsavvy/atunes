@@ -202,11 +202,6 @@ export const useStore = create<StoreState>((set, get) => ({
             label: "💖 Favorites",
             type: "static" as const,
           },
-          {
-            id: "playlists" as const,
-            label: "🎵 Playlists",
-            type: "static" as const,
-          },
         ],
       });
     } else {
