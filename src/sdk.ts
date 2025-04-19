@@ -137,8 +137,9 @@ export const fetchPlaylistsByUser = async (userId: string) => {
               ...(source.children || []),
               {
                 id: playlistSource,
-                label: `🎵 ${playlist.playlistName}`,
+                label: playlist.playlistName,
                 type: "dynamic" as const,
+                icon: playlist.artwork ? playlist.artwork._150x150 : "🎵",
               },
             ],
           };

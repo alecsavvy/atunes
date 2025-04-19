@@ -54,6 +54,7 @@ type SourceConfig = {
   label: string;
   type: "static" | "dynamic";
   children?: readonly SourceConfig[];
+  icon?: string;
 };
 
 type StoreState = {

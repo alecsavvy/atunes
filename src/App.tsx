@@ -391,7 +391,19 @@ export default function App() {
                   }`}
                   onClick={() => setSelectedSource(source.id)}
                 >
-                  {source.label}
+                  {typeof source.icon === "string" &&
+                  source.icon.startsWith("http") ? (
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={source.icon}
+                        alt=""
+                        className="w-4 h-4 rounded"
+                      />
+                      {source.label}
+                    </div>
+                  ) : (
+                    source.label
+                  )}
                 </div>
                 {source.children && (
                   <ul className="ml-4 space-y-1">
@@ -405,7 +417,19 @@ export default function App() {
                         }`}
                         onClick={() => setSelectedSource(child.id)}
                       >
-                        {child.label}
+                        {typeof child.icon === "string" &&
+                        child.icon.startsWith("http") ? (
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={child.icon}
+                              alt=""
+                              className="w-4 h-4 rounded"
+                            />
+                            {child.label}
+                          </div>
+                        ) : (
+                          child.label
+                        )}
                       </li>
                     ))}
                   </ul>
