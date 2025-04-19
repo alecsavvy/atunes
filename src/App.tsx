@@ -1002,7 +1002,7 @@ export default function App() {
                               : isDark
                               ? "bg-zinc-900"
                               : "bg-white"
-                          } hover:bg-[#E6C7FF]/70 cursor-pointer`}
+                          } hover:bg-[#E6C7FF]/70 dark:hover:text-black cursor-pointer`}
                           onDoubleClick={() => handleTrackClick(track)}
                           onContextMenu={(e) => handleContextMenu(e, track)}
                         >
