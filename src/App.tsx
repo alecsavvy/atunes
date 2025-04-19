@@ -6,7 +6,13 @@ import {
   fetchTrendingTracks,
   fetchUndergroundTracks,
   getStreamUrl,
+  fetchFavoritesTracks,
+  fetchUploads,
+  fetchPlaylistsTracks,
+  convertAudiusTrack,
+  audiusSdk,
 } from "./sdk";
+import { PlaylistFullWithoutTracks } from "@audius/sdk/dist/sdk/api/generated/full";
 import Login from "./Login";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
@@ -429,6 +435,93 @@ export default function App() {
     }
   }, [getUserState, getUserState()]);
 
+  const handleSourceClick = (sourceId: string) => {
+    setSelectedSource(sourceId);
+
+    // Fetch new data based on the selected source
+    switch (sourceId) {
+      case "trending":
+        fetchTrendingTracks();
+        break;
+      case "underground":
+        fetchUndergroundTracks();
+        break;
+      case "feelingLucky":
+        fetchFeelingLuckyTracks();
+        break;
+      case "favorites":
+        const userState = getUserState();
+        if (userState) {
+          fetchFavoritesTracks(userState.userId);
+        }
+        break;
+      case "uploads":
+        const userState2 = getUserState();
+        if (userState2) {
+          fetchUploads(userState2.userId);
+        }
+        break;
+      default:
+        // Handle dynamic playlist sources
+        if (sourceId.startsWith("playlist-")) {
+          const playlistId = sourceId.replace("playlist-", "");
+          // First get the playlist info to update the label
+          audiusSdk.full.playlists
+            .getPlaylist({ playlistId })
+            .then(({ data: playlists }) => {
+              const playlist = playlists?.[0] as PlaylistFullWithoutTracks;
+              if (playlist) {
+                // Update the source label
+                const store = useStore.getState();
+                const updatedSources = store.sources.map((source) => {
+                  if (source.id === "library" && source.children) {
+                    return {
+                      ...source,
+                      children: source.children.map((child) => {
+                        if (child.id === sourceId) {
+                          return {
+                            ...child,
+                            label: playlist.playlistName,
+                            icon: playlist.artwork
+                              ? playlist.artwork._150x150
+                              : "🎵",
+                          };
+                        }
+                        return child;
+                      }),
+                    };
+                  }
+                  return source;
+                });
+                store.setSources(updatedSources);
+              }
+            })
+            .catch((error: Error) => {
+              console.error(
+                `Failed to fetch playlist info for ${sourceId}:`,
+                error
+              );
+            });
+
+          // Then fetch and update the tracks
+          fetchPlaylistsTracks(playlistId)
+            .then((tracks) => {
+              const convertedTracks = tracks.map((track, index) =>
+                convertAudiusTrack(track, index, sourceId)
+              );
+              useStore.getState().setTracks(sourceId, convertedTracks);
+            })
+            .catch((error: Error) => {
+              console.error(
+                `Failed to fetch playlist tracks for ${sourceId}:`,
+                error
+              );
+            });
+        }
+        break;
+    }
+  };
+
   return (
     <div
       className={`${fontClass} h-screen flex flex-col ${isDark ? "dark" : ""}`}
@@ -773,15 +866,19 @@ export default function App() {
           </div>
         </div>
         <div className="w-[200px] flex items-center justify-end gap-2">
-          {getUserState() ? (
-            <img
-              src={getUserState()?.profilePicture?.["_480x480"] || ""}
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-black"
-            />
-          ) : (
-            <Login />
-          )}
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-3">
+              {getUserState() ? (
+                <img
+                  src={getUserState()?.profilePicture?.["_480x480"] || ""}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full border-2 border-black"
+                />
+              ) : (
+                <Login />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -799,7 +896,7 @@ export default function App() {
                       ? "bg-[#E6C7FF] dark:text-black"
                       : ""
                   }`}
-                  onClick={() => setSelectedSource(source.id)}
+                  onClick={() => handleSourceClick(source.id)}
                   onDoubleClick={() => handleSourceDoubleClick(source.id)}
                 >
                   {typeof source.icon === "string" &&
@@ -833,7 +930,7 @@ export default function App() {
                             ? "bg-[#E6C7FF] dark:text-black"
                             : ""
                         }`}
-                        onClick={() => setSelectedSource(child.id)}
+                        onClick={() => handleSourceClick(child.id)}
                       >
                         {typeof child.icon === "string" &&
                         child.icon.startsWith("http") ? (

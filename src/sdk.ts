@@ -29,6 +29,8 @@ const convertAudiusTrack = (track: Track, index: number, source: string) => ({
   artwork: track.artwork,
 });
 
+export { convertAudiusTrack };
+
 export const fetchTrendingTracks = async () => {
   try {
     const { data: tracks } = await audiusSdk.tracks.getTrendingTracks();
