@@ -69,11 +69,6 @@ export default function App() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const parseDuration = (duration: string) => {
-    const [minutes, seconds] = duration.split(":").map(Number);
-    return minutes * 60 + seconds;
-  };
-
   const handleTrackClick = (track: Track) => {
     setCurrentTrack(track);
     setAudioSource(null); // Reset audio source to trigger new URL fetch
