@@ -4,8 +4,8 @@ import {
   PlaylistFullWithoutTracks,
   TrackFull,
 } from "@audius/sdk/dist/sdk/api/generated/full";
-
 const audiusSdkApiKey = "832c79b4c0a3da1affae305269a9eb8305858158";
+export const NO_ALBUM = "<no album>";
 
 export const audiusSdk: AudiusSdk = window.audiusSdk({
   apiKey: audiusSdkApiKey,
@@ -16,7 +16,7 @@ const convertAudiusTrack = (track: Track, index: number, source: string) => ({
   index: index + 1,
   title: track.title,
   artist: track.user.name,
-  album: track.albumBacklink?.playlistName || "<no album>",
+  album: track.albumBacklink?.playlistName || NO_ALBUM,
   duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
     .toString()
     .padStart(2, "0")}`,

@@ -13,7 +13,7 @@ import "react-h5-audio-player/lib/styles.css";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { QueueView } from "./components/QueueView";
-
+import { NO_ALBUM } from "./sdk";
 interface ContextMenuProps {
   track: Track;
   position: { x: number; y: number };
@@ -61,6 +61,11 @@ const ContextMenu = ({
     onClose();
   };
 
+  const handleViewAlbum = () => {
+    // setSelectedAlbum(track.album);
+    onClose();
+  };
+
   return (
     <div
       className="fixed z-50 p-6"
@@ -99,12 +104,14 @@ const ContextMenu = ({
         >
           View Genre: {track.genre}
         </div>
-        <div className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
-          Add to Playlist
-        </div>
-        <div className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
-          Share
-        </div>
+        {track.album !== NO_ALBUM && (
+          <div
+            className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+            onClick={handleViewAlbum}
+          >
+            View Album: {track.album}
+          </div>
+        )}
       </div>
     </div>
   );
