@@ -954,9 +954,15 @@ export default function App() {
                           key={track.id}
                           className={`${
                             currentTrack?.id === track.id
-                              ? "bg-zinc-400/70"
+                              ? isDark
+                                ? "bg-zinc-600/70"
+                                : "bg-zinc-400/70"
                               : i % 2 === 0
-                              ? "bg-zinc-100"
+                              ? isDark
+                                ? "bg-zinc-800"
+                                : "bg-zinc-100"
+                              : isDark
+                              ? "bg-zinc-900"
                               : "bg-white"
                           } hover:bg-[#E6C7FF]/70 cursor-pointer`}
                           onDoubleClick={() => handleTrackClick(track)}
