@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
-import { useStore } from "./store";
+import { useStore, PlaybackState } from "./store";
 import { fetchTrendingTracks, fetchUndergroundTracks } from "./Sdk";
 import Login from "./Login";
 
@@ -22,7 +22,58 @@ export default function App() {
     getUniqueAlbums,
     getUserState,
     sources,
+    currentTrack,
+    playbackState,
+    currentTime,
+    duration,
+    setCurrentTrack,
+    setPlaybackState,
+    setCurrentTime,
+    setDuration,
   } = useStore();
+
+  // Simulate playback progress
+  useEffect(() => {
+    if (playbackState === PlaybackState.SONG_PLAYING) {
+      const interval = setInterval(() => {
+        setCurrentTime((prev: number) => {
+          if (prev >= duration) {
+            setPlaybackState(PlaybackState.SONG_PAUSED);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [playbackState, duration]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const togglePlayback = () => {
+    if (playbackState === PlaybackState.NO_SONG_SELECTED) {
+      // Initialize mock track when first playing
+      setCurrentTrack({
+        id: 1,
+        title: "Sample Track",
+        artist: "Sample Artist",
+        album: "Sample Album",
+        duration: "3:45",
+        genre: "Pop",
+      });
+      setDuration(225); // 3:45 in seconds
+      setCurrentTime(0);
+      setPlaybackState(PlaybackState.SONG_PLAYING);
+    } else if (playbackState === PlaybackState.SONG_PLAYING) {
+      setPlaybackState(PlaybackState.SONG_PAUSED);
+    } else if (playbackState === PlaybackState.SONG_PAUSED) {
+      setPlaybackState(PlaybackState.SONG_PLAYING);
+    }
+  };
 
   // Fetch trending tracks on startup
   useEffect(() => {
@@ -53,11 +104,45 @@ export default function App() {
       <div className="relative flex items-center justify-between px-4 py-4 border-b border-[#999] shadow-inner brushed-metal">
         <div className="flex items-center gap-2">
           <button className="aqua-button">⏮️</button>
-          <button className="aqua-button">▶️</button>
+          <button className="aqua-button" onClick={togglePlayback}>
+            {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
+          </button>
           <button className="aqua-button">⏭️</button>
         </div>
         <div className="w-150 py-4 rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 text-center">
-          <img src={AudiusGlyph} alt="Audius" className="w-6 h-6 mx-auto" />
+          {playbackState === PlaybackState.NO_SONG_SELECTED ? (
+            <img src={AudiusGlyph} alt="Audius" className="w-6 h-6 mx-auto" />
+          ) : (
+            <div className="px-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-8 h-8 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center shadow-inner border border-[#8caacc]">
+                  <span>🎵</span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium truncate">
+                    {currentTrack?.title || "No track playing"}
+                  </div>
+                  <div className="text-xs text-zinc-600 truncate">
+                    {currentTrack?.artist || "No artist"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-zinc-600">
+                  {formatTime(currentTime)}
+                </span>
+                <div className="flex-1 h-1 bg-[#e1dba7] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#7fa6d9] rounded-full"
+                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs text-zinc-600">
+                  {formatTime(duration)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {getUserState() ? (

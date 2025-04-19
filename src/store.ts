@@ -6,6 +6,12 @@ import {
   fetchUploads,
 } from "./Sdk";
 
+export enum PlaybackState {
+  NO_SONG_SELECTED = "NO_SONG_SELECTED",
+  SONG_PLAYING = "SONG_PLAYING",
+  SONG_PAUSED = "SONG_PAUSED",
+}
+
 export type Track = {
   id: number;
   title: string;
@@ -43,12 +49,20 @@ type StoreState = {
   favorites: Track[];
   playlists: Track[];
   uploads: Track[];
+  currentTrack: Track | null;
+  playbackState: PlaybackState;
+  currentTime: number;
+  duration: number;
   [key: string]:
     | Track[]
     | FilterState
     | DecodedUserToken
     | null
     | SourceConfig[]
+    | number
+    | boolean
+    | Track
+    | PlaybackState
     | ((...args: any[]) => any);
   filterState: FilterState;
   userState: DecodedUserToken | null;
@@ -69,6 +83,10 @@ type StoreState = {
   updateSources: (userState: DecodedUserToken | null) => void;
   addDynamicSource: (source: SourceConfig) => void;
   removeDynamicSource: (sourceId: string) => void;
+  setCurrentTrack: (track: Track | null) => void;
+  setPlaybackState: (state: PlaybackState) => void;
+  setCurrentTime: (currentTime: number | ((prev: number) => number)) => void;
+  setDuration: (duration: number) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -78,6 +96,10 @@ export const useStore = create<StoreState>((set, get) => ({
   favorites: [],
   playlists: [],
   uploads: [],
+  currentTrack: null,
+  playbackState: PlaybackState.NO_SONG_SELECTED,
+  currentTime: 0,
+  duration: 0,
   filterState: {
     selectedSource: "library",
     selectedGenre: null,
@@ -216,4 +238,20 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => ({
       sources: state.sources.filter((source) => source.id !== sourceId),
     })),
+  setCurrentTrack: (track) =>
+    set({
+      currentTrack: track,
+      playbackState: track
+        ? PlaybackState.SONG_PAUSED
+        : PlaybackState.NO_SONG_SELECTED,
+    }),
+  setPlaybackState: (state) => set({ playbackState: state }),
+  setCurrentTime: (currentTime) =>
+    set((state) => ({
+      currentTime:
+        typeof currentTime === "function"
+          ? currentTime(state.currentTime)
+          : currentTime,
+    })),
+  setDuration: (duration) => set({ duration }),
 }));
