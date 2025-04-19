@@ -1,8 +1,12 @@
 import { AudiusSdk, Favorite, Track } from "@audius/sdk";
 import { useStore } from "./store";
+import Hashids from "hashids";
 
 const audiusSdkApiKey = "832c79b4c0a3da1affae305269a9eb8305858158";
 export const NO_ALBUM = "<no album>";
+const HASH_SALT = "azowernasdfoia";
+const MIN_LENGTH = 5;
+const hashids = new Hashids(HASH_SALT, MIN_LENGTH);
 
 export const audiusSdk: AudiusSdk = window.audiusSdk({
   apiKey: audiusSdkApiKey,
@@ -15,6 +19,9 @@ const convertAudiusTrack = (track: Track, index: number, source: string) => ({
   artist: track.user.name,
   artistId: track.user.id,
   album: track.albumBacklink?.playlistName || NO_ALBUM,
+  albumId: track.albumBacklink?.playlistId
+    ? hashids.encode(Number(track.albumBacklink.playlistId))
+    : "",
   duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
     .toString()
     .padStart(2, "0")}`,

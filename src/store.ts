@@ -19,6 +19,7 @@ export type Track = {
   artist: string;
   artistId: string;
   album: string;
+  albumId: string;
   duration: string;
   genre: string;
   playCount?: number;

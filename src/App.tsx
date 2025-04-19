@@ -134,7 +134,7 @@ const ContextMenu = ({
     if (track.album === NO_ALBUM) return;
     const sourceId = `album-${track.album}`;
     setSelectedSource(sourceId);
-    const tracks = await getAlbumTracks(track.album);
+    const tracks = await getAlbumTracks(track.albumId);
     const convertedTracks = tracks.map((t: TrackFull, index: number) =>
       convertAudiusTrack(t, index, sourceId)
     );
