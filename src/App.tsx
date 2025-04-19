@@ -270,7 +270,7 @@ export default function App() {
     position: { x: number; y: number };
   } | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<string>>(
-    new Set(["discover"])
+    new Set(["discover", "recents"])
   );
 
   const {

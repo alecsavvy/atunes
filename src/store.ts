@@ -248,11 +248,6 @@ export const useStore = create<StoreState>((set, get) => {
         type: "static" as const,
         children: [
           {
-            id: "searches" as const,
-            label: "🔎 Searches",
-            type: "static" as const,
-          },
-          {
             id: "played-tracks" as const,
             label: "🎵 Played Tracks",
             type: "static" as const,
@@ -514,11 +509,6 @@ export const useStore = create<StoreState>((set, get) => {
           label: "⏱️ Recents",
           type: "static" as const,
           children: [
-            {
-              id: "searches" as const,
-              label: "🔎 Searches",
-              type: "static" as const,
-            },
             {
               id: "played-tracks" as const,
               label: "🎵 Played Tracks",
