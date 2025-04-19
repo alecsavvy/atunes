@@ -12,7 +12,8 @@ export const audiusSdk: AudiusSdk = window.audiusSdk({
 });
 
 const convertAudiusTrack = (track: Track, index: number, source: string) => ({
-  id: index + 1,
+  id: track.id,
+  index: index + 1,
   title: track.title,
   artist: track.user.name,
   album: track.albumBacklink?.playlistName || "<no album>",

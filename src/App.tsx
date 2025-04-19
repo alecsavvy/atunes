@@ -3,6 +3,7 @@ import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore, PlaybackState, Track } from "./store";
 import { fetchTrendingTracks, fetchUndergroundTracks } from "./Sdk";
 import Login from "./Login";
+import { initializeAudioPlayer } from "./audioPlayer";
 
 export default function App() {
   const [isDark, setIsDark] = useState(() =>
@@ -32,25 +33,14 @@ export default function App() {
     setDuration,
   } = useStore();
 
-  // Simulate playback progress
+  // Initialize audio player
   useEffect(() => {
-    if (playbackState === PlaybackState.SONG_PLAYING) {
-      const interval = setInterval(() => {
-        setCurrentTime((prev: number) => {
-          if (prev >= duration) {
-            setPlaybackState(PlaybackState.SONG_PAUSED);
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [playbackState, duration]);
+    initializeAudioPlayer();
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
@@ -79,22 +69,11 @@ export default function App() {
   };
 
   const togglePlayback = () => {
-    if (playbackState === PlaybackState.NO_SONG_SELECTED) {
-      // Initialize mock track when first playing
-      setCurrentTrack({
-        id: 1,
-        title: "Sample Track",
-        artist: "Sample Artist",
-        album: "Sample Album",
-        duration: "3:45",
-        genre: "Pop",
-      });
-      setDuration(225); // 3:45 in seconds
-      setCurrentTime(0);
-      setPlaybackState(PlaybackState.SONG_PLAYING);
-    } else if (playbackState === PlaybackState.SONG_PLAYING) {
+    if (playbackState === PlaybackState.NO_SONG_SELECTED) return;
+
+    if (playbackState === PlaybackState.SONG_PLAYING) {
       setPlaybackState(PlaybackState.SONG_PAUSED);
-    } else if (playbackState === PlaybackState.SONG_PAUSED) {
+    } else {
       setPlaybackState(PlaybackState.SONG_PLAYING);
     }
   };

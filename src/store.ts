@@ -13,7 +13,8 @@ export enum PlaybackState {
 }
 
 export type Track = {
-  id: number;
+  id: string;
+  index: number;
   title: string;
   artist: string;
   album: string;
