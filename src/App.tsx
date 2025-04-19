@@ -1093,19 +1093,21 @@ export default function App() {
                 {[
                   {
                     title: "Genres",
-                    items: getUniqueGenres(),
+                    items: getUniqueGenres().sort((a, b) => a.localeCompare(b)),
                     selected: filterState.selectedGenre,
                     setSelected: setSelectedGenre,
                   },
                   {
                     title: "Artists",
-                    items: getUniqueArtists(),
+                    items: getUniqueArtists().sort((a, b) =>
+                      a.localeCompare(b)
+                    ),
                     selected: filterState.selectedArtist,
                     setSelected: setSelectedArtist,
                   },
                   {
                     title: "Albums",
-                    items: getUniqueAlbums(),
+                    items: getUniqueAlbums().sort((a, b) => a.localeCompare(b)),
                     selected: filterState.selectedAlbum,
                     setSelected: setSelectedAlbum,
                   },
