@@ -202,7 +202,11 @@ export default function App() {
   }, []);
 
   // Fetch tracks when source changes
-  useEffect(() => {}, [filterState.selectedSource]);
+  useEffect(() => {
+    setSelectedGenre(null);
+    setSelectedArtist(null);
+    setSelectedAlbum(null);
+  }, [filterState.selectedSource]);
 
   useEffect(() => {
     if (currentTrack && !audioSource) {
