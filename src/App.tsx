@@ -229,6 +229,30 @@ export default function App() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const shuffleQueue = (tracks: Track[], startFromTrack?: Track) => {
+    if (!tracks.length) return tracks;
+
+    // If we have a startFromTrack, find its index and split the array
+    if (startFromTrack) {
+      const startIndex = tracks.findIndex((t) => t.id === startFromTrack.id);
+      if (startIndex !== -1) {
+        // Split the array into two parts: before and after the start track
+        const beforeStart = tracks.slice(0, startIndex);
+        const afterStart = tracks.slice(startIndex + 1);
+
+        // Shuffle both parts
+        const shuffledBefore = [...beforeStart].sort(() => Math.random() - 0.5);
+        const shuffledAfter = [...afterStart].sort(() => Math.random() - 0.5);
+
+        // Combine them with the start track in the middle
+        return [startFromTrack, ...shuffledAfter, ...shuffledBefore];
+      }
+    }
+
+    // If no start track or not found, just shuffle the whole array
+    return [...tracks].sort(() => Math.random() - 0.5);
+  };
+
   const handleTrackClick = (track: Track) => {
     // Only clear queue if we're starting a new playback sequence
     if (playbackState === PlaybackState.NO_SONG_SELECTED) {
@@ -241,18 +265,21 @@ export default function App() {
     // Find the index of the clicked track
     const trackIndex = allTracks.findIndex((t) => t.id === track.id);
 
-    // Add the clicked track to the queue
-    addToQueue(track);
+    // Get tracks after the clicked track
+    const tracksAfter = allTracks.slice(trackIndex + 1);
+    // Get tracks before the clicked track
+    const tracksBefore = allTracks.slice(0, trackIndex);
 
-    // Add all tracks from the clicked track onwards to the queue
-    for (let i = trackIndex + 1; i < allTracks.length; i++) {
-      addToQueue(allTracks[i]);
-    }
+    // Combine all tracks in order: clicked track, tracks after, tracks before
+    const queueTracks = [track, ...tracksAfter, ...tracksBefore];
 
-    // Add tracks before the clicked track to the end of the queue
-    for (let i = 0; i < trackIndex; i++) {
-      addToQueue(allTracks[i]);
-    }
+    // If shuffle is on, shuffle the queue starting from the clicked track
+    const finalQueueTracks = shuffle
+      ? shuffleQueue(queueTracks, track)
+      : queueTracks;
+
+    // Add all tracks to the queue
+    finalQueueTracks.forEach((t) => addToQueue(t));
 
     // Set the clicked track as current and start playing
     setCurrentTrack(track);

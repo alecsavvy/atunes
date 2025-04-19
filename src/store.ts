@@ -583,5 +583,39 @@ export const useStore = create<StoreState>((set, get) => ({
     }
   },
   toggleLoop: () => set((state) => ({ loop: !state.loop })),
-  toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
+  toggleShuffle: () =>
+    set((state) => {
+      const newShuffleState = !state.shuffle;
+      // Only reshuffle when turning shuffle ON
+      if (newShuffleState && state.queue.length > 0) {
+        // If we have a queue, reshuffle it starting from the current track
+        const currentTrackIndex = state.currentQueueIndex;
+        const currentTrack = state.currentTrack;
+
+        if (currentTrackIndex !== -1 && currentTrack) {
+          // Split the queue into two parts: before and after the current track
+          const beforeCurrent = state.queue.slice(0, currentTrackIndex);
+          const afterCurrent = state.queue.slice(currentTrackIndex + 1);
+
+          // Shuffle both parts
+          const shuffledBefore = [...beforeCurrent].sort(
+            () => Math.random() - 0.5
+          );
+          const shuffledAfter = [...afterCurrent].sort(
+            () => Math.random() - 0.5
+          );
+
+          // Combine them with the current track in the middle
+          const newQueue = [currentTrack, ...shuffledAfter, ...shuffledBefore];
+
+          return {
+            shuffle: newShuffleState,
+            queue: newQueue,
+            currentQueueIndex: 0, // Current track is now at index 0
+          };
+        }
+      }
+      // When turning shuffle OFF, just update the state
+      return { shuffle: newShuffleState };
+    }),
 }));
