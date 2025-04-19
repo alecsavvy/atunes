@@ -161,9 +161,6 @@ const ScrollingText = ({
 };
 
 export default function App() {
-  const [isDark, setIsDark] = useState(() =>
-    document.documentElement.classList.contains("dark")
-  );
   const [contextMenu, setContextMenu] = useState<{
     track: Track;
     position: { x: number; y: number };
@@ -203,6 +200,8 @@ export default function App() {
     toggleShuffle,
     loop,
     shuffle,
+    isDark,
+    toggleTheme,
   } = useStore();
 
   const [localVolume, setLocalVolume] = useState(0.7);
@@ -372,16 +371,6 @@ export default function App() {
       audioPlayerRef.current.audio.current.volume = volume;
     }
   }, [volume]);
-
-  const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    document.documentElement.classList.toggle("dark", newTheme);
-  };
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-  }, [isDark]);
 
   const fontClass = 'font-["Lucida_Grande","Tahoma",sans-serif]';
 

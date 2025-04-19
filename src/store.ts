@@ -77,6 +77,7 @@ type StoreState = {
   showQueue: boolean;
   loop: boolean;
   shuffle: boolean;
+  isDark: boolean;
   filterState: FilterState;
   userState: DecodedUserToken | null;
   sources: readonly SourceConfig[];
@@ -110,6 +111,7 @@ type StoreState = {
   previousTrack: () => void;
   toggleLoop: () => void;
   toggleShuffle: () => void;
+  toggleTheme: () => void;
   [key: string]:
     | Track[]
     | FilterState
@@ -163,6 +165,7 @@ export const useStore = create<StoreState>((set, get) => ({
   showQueue: false,
   loop: true,
   shuffle: false,
+  isDark: document.documentElement.classList.contains("dark"),
   filterState: {
     selectedSource: "trending",
     selectedGenre: null,
@@ -618,4 +621,9 @@ export const useStore = create<StoreState>((set, get) => ({
       // When turning shuffle OFF, just update the state
       return { shuffle: newShuffleState };
     }),
+  toggleTheme: () => {
+    const newTheme = !get().isDark;
+    set({ isDark: newTheme });
+    document.documentElement.classList.toggle("dark", newTheme);
+  },
 }));
