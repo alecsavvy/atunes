@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useStore } from "./store";
-import { audiusSdk } from "./Sdk";
+import { audiusSdk } from "./sdk";
 
 export default function Login() {
   const { setUserState } = useStore();
