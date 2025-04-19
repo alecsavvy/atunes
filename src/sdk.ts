@@ -151,6 +151,14 @@ export const fetchPlaylistsByUser = async (userId: string) => {
   );
 };
 
+export const fetchFeelingLuckyTracks = async () => {
+  const { data: tracks } = await audiusSdk.full.tracks.getFeelingLuckyTracks();
+  const convertedTracks = (tracks ?? []).map((track, index) =>
+    convertAudiusTrack(track, index, "feelingLucky")
+  );
+  useStore.getState().setTracks("feelingLucky", convertedTracks);
+};
+
 export const getStreamUrl = async (trackId: string): Promise<string> => {
   try {
     const streamUrl = await audiusSdk.tracks.getTrackStreamUrl({

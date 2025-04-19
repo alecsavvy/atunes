@@ -34,7 +34,7 @@ type FilterState = {
     | "discover"
     | "trending"
     | "underground"
-    | "feeling-lucky"
+    | "feelingLucky"
     | "library"
     | "favorites"
     | "uploads"
@@ -149,7 +149,7 @@ export const useStore = create<StoreState>((set, get) => ({
           type: "static" as const,
         },
         {
-          id: "feeling-lucky" as const,
+          id: "feelingLucky" as const,
           label: "🎲 Feeling Lucky",
           type: "static" as const,
         },
@@ -218,7 +218,7 @@ export const useStore = create<StoreState>((set, get) => ({
     const sourceMap: Record<string, string> = {
       "played-tracks": "playedTracks",
       searches: "searches",
-      "feeling-lucky": "feelingLucky",
+      feelingLucky: "feelingLucky",
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
@@ -242,11 +242,6 @@ export const useStore = create<StoreState>((set, get) => ({
       );
     }
 
-    // If feeling lucky, shuffle the tracks
-    if (filterState.selectedSource === "feeling-lucky") {
-      filtered = [...filtered].sort(() => Math.random() - 0.5);
-    }
-
     // For played tracks, maintain the order of most recent first
     if (filterState.selectedSource === "played-tracks") {
       return filtered;
@@ -263,7 +258,7 @@ export const useStore = create<StoreState>((set, get) => ({
     const sourceMap: Record<string, string> = {
       "played-tracks": "playedTracks",
       searches: "searches",
-      "feeling-lucky": "feelingLucky",
+      feelingLucky: "feelingLucky",
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
@@ -275,7 +270,7 @@ export const useStore = create<StoreState>((set, get) => ({
     const sourceMap: Record<string, string> = {
       "played-tracks": "playedTracks",
       searches: "searches",
-      "feeling-lucky": "feelingLucky",
+      feelingLucky: "feelingLucky",
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
@@ -287,7 +282,7 @@ export const useStore = create<StoreState>((set, get) => ({
     const sourceMap: Record<string, string> = {
       "played-tracks": "playedTracks",
       searches: "searches",
-      "feeling-lucky": "feelingLucky",
+      feelingLucky: "feelingLucky",
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
@@ -325,7 +320,7 @@ export const useStore = create<StoreState>((set, get) => ({
             type: "static" as const,
           },
           {
-            id: "feeling-lucky" as const,
+            id: "feelingLucky" as const,
             label: "🎲 Feeling Lucky",
             type: "static" as const,
           },

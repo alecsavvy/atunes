@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore, PlaybackState, Track } from "./store";
 import {
+  fetchFeelingLuckyTracks,
   fetchTrendingTracks,
   fetchUndergroundTracks,
   getStreamUrl,
@@ -199,6 +200,7 @@ export default function App() {
   useEffect(() => {
     fetchTrendingTracks();
     fetchUndergroundTracks();
+    fetchFeelingLuckyTracks();
   }, []);
 
   // Fetch tracks when source changes
