@@ -112,7 +112,7 @@ export const QueueView: React.FC = () => {
                         onClick={() => skipToTrack(index)}
                         className="w-full px-2 py-1 text-xs text-zinc-800 bg-zinc-100 hover:bg-zinc-200 border border-[#E6C7FF] hover:border-[#C273FF] rounded cursor-pointer transition-colors"
                       >
-                        Skip To
+                        Play Next
                       </button>
                       <button
                         onClick={() => removeFromQueue(index)}

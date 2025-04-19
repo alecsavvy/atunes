@@ -202,6 +202,8 @@ export default function App() {
     toggleShuffle,
     loop,
     shuffle,
+    nextTrack,
+    previousTrack,
   } = useStore();
 
   const [localVolume, setLocalVolume] = useState(0.7);
@@ -429,7 +431,23 @@ export default function App() {
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-3">
-              <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]">
+              <button
+                className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
+                onClick={() => {
+                  if (currentTrack && queue.length > 0) {
+                    // Add current track to the end of queue if loop is enabled
+                    if (loop) {
+                      addToQueue(currentTrack);
+                    }
+                    // Set next track from queue as current
+                    setCurrentTrack(queue[0]);
+                    setAudioSource(null);
+                    setCurrentTime(0);
+                    setPlaybackState(PlaybackState.SONG_PLAYING);
+                    removeFromQueue(0);
+                  }
+                }}
+              >
                 <svg
                   width="16"
                   height="16"
@@ -484,7 +502,23 @@ export default function App() {
                   </svg>
                 )}
               </button>
-              <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]">
+              <button
+                className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
+                onClick={() => {
+                  if (currentTrack) {
+                    // Add current track to the beginning of queue
+                    addToQueue(currentTrack);
+                    // If we have a previous track in history, play it
+                    if (queue.length > 0) {
+                      setCurrentTrack(queue[queue.length - 1]);
+                      setAudioSource(null);
+                      setCurrentTime(0);
+                      setPlaybackState(PlaybackState.SONG_PLAYING);
+                      removeFromQueue(queue.length - 1);
+                    }
+                  }
+                }}
+              >
                 <svg
                   width="16"
                   height="16"
