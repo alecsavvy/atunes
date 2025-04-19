@@ -54,6 +54,18 @@ export default function App() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleScrubberClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (playbackState === PlaybackState.NO_SONG_SELECTED) return;
+
+    const scrubber = e.currentTarget;
+    const rect = scrubber.getBoundingClientRect();
+    const clickPosition = e.clientX - rect.left;
+    const percentage = clickPosition / rect.width;
+    const newTime = Math.floor(duration * percentage);
+
+    setCurrentTime(newTime);
+  };
+
   const togglePlayback = () => {
     if (playbackState === PlaybackState.NO_SONG_SELECTED) {
       // Initialize mock track when first playing
@@ -128,11 +140,16 @@ export default function App() {
                 <span className="text-xs text-zinc-600">
                   {formatTime(currentTime)}
                 </span>
-                <div className="flex-1 h-1 bg-[#e1dba7] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#7fa6d9] rounded-full"
-                    style={{ width: `${(currentTime / duration) * 100}%` }}
-                  />
+                <div
+                  className="flex-1 h-4 bg-transparent cursor-pointer flex items-center"
+                  onClick={handleScrubberClick}
+                >
+                  <div className="w-full h-1 bg-[#e1dba7] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#7fa6d9] rounded-full"
+                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                    />
+                  </div>
                 </div>
                 <span className="text-xs text-zinc-600">
                   {formatTime(duration)}
