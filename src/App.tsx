@@ -10,10 +10,71 @@ import Login from "./Login";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 
+interface ContextMenuProps {
+  track: Track;
+  position: { x: number; y: number };
+  onClose: () => void;
+}
+
+const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
+  const { setSelectedArtist, setSelectedGenre } = useStore();
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleViewArtist = () => {
+    setSelectedArtist(track.artist);
+    onClose();
+  };
+
+  const handleViewGenre = () => {
+    setSelectedGenre(track.genre);
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed z-50 p-6"
+      style={{ top: position.y - 24, left: position.x - 24 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        onClose();
+      }}
+    >
+      <div
+        className="bg-white dark:bg-zinc-800 shadow-lg rounded-md py-2 border border-zinc-200 dark:border-zinc-700"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          onClick={handleViewArtist}
+        >
+          View Artist: {track.artist}
+        </div>
+        <div
+          className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          onClick={handleViewGenre}
+        >
+          View Genre: {track.genre}
+        </div>
+        <div className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
+          Add to Playlist
+        </div>
+        <div className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
+          Share
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
+  const [contextMenu, setContextMenu] = useState<{
+    track: Track;
+    position: { x: number; y: number };
+  } | null>(null);
 
   const {
     filterState,
@@ -152,9 +213,24 @@ export default function App() {
 
   const fontClass = 'font-["Lucida_Grande","Tahoma",sans-serif]';
 
+  const handleContextMenu = (e: React.MouseEvent, track: Track) => {
+    e.preventDefault();
+    setContextMenu({
+      track,
+      position: { x: e.clientX, y: e.clientY },
+    });
+  };
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
   return (
     <div
       className={`${fontClass} h-screen flex flex-col ${isDark ? "dark" : ""}`}
+      onClick={() => setContextMenu(null)}
     >
       {/* Hidden audio player */}
       <AudioPlayer
@@ -384,6 +460,7 @@ export default function App() {
                       i % 2 === 0 ? "bg-white/40" : "bg-white/20"
                     } hover:bg-blue-200/70 cursor-pointer`}
                     onDoubleClick={() => handleTrackClick(track)}
+                    onContextMenu={(e) => handleContextMenu(e, track)}
                   >
                     <td className="px-4 py-2">{track.title}</td>
                     <td className="px-4 py-2">{track.artist}</td>
@@ -418,6 +495,14 @@ export default function App() {
           {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
         </button>
       </div>
+
+      {contextMenu && (
+        <ContextMenu
+          track={contextMenu.track}
+          position={contextMenu.position}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 }
