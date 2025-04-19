@@ -356,11 +356,69 @@ export default function App() {
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-2">
-              <button className="aqua-button">⏮️</button>
-              <button className="aqua-button" onClick={togglePlayback}>
-                {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
+              <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className={
+                    playbackState === PlaybackState.NO_SONG_SELECTED
+                      ? "text-zinc-400"
+                      : "text-zinc-800"
+                  }
+                >
+                  <path d="M18 4L12 12L18 20V4Z" fill="currentColor" />
+                  <path d="M12 4L6 12L12 20V4Z" fill="currentColor" />
+                </svg>
               </button>
-              <button className="aqua-button">⏭️</button>
+              <button
+                className="w-10 h-10 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
+                onClick={togglePlayback}
+              >
+                {playbackState === PlaybackState.SONG_PLAYING ? (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="text-zinc-800"
+                  >
+                    <path d="M6 4H10V20H6V4Z" fill="currentColor" />
+                    <path d="M14 4H18V20H14V4Z" fill="currentColor" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className={
+                      playbackState === PlaybackState.NO_SONG_SELECTED
+                        ? "text-zinc-400"
+                        : "text-zinc-800"
+                    }
+                  >
+                    <path d="M8 5V19L19 12L8 5Z" fill="currentColor" />
+                  </svg>
+                )}
+              </button>
+              <button className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className={
+                    playbackState === PlaybackState.NO_SONG_SELECTED
+                      ? "text-zinc-400"
+                      : "text-zinc-800"
+                  }
+                >
+                  <path d="M6 4L12 12L6 20V4Z" fill="currentColor" />
+                  <path d="M12 4L18 12L12 20V4Z" fill="currentColor" />
+                </svg>
+              </button>
             </div>
             <div className="flex items-center gap-2 w-full px-2">
               <span className="text-xs">🔈</span>
