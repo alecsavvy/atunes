@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
-import { useStore, PlaybackState } from "./store";
+import { useStore, PlaybackState, Track } from "./store";
 import { fetchTrendingTracks, fetchUndergroundTracks } from "./Sdk";
 import Login from "./Login";
 
@@ -52,6 +52,18 @@ export default function App() {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const parseDuration = (duration: string) => {
+    const [minutes, seconds] = duration.split(":").map(Number);
+    return minutes * 60 + seconds;
+  };
+
+  const handleTrackClick = (track: Track) => {
+    setCurrentTrack(track);
+    setDuration(parseDuration(track.duration));
+    setCurrentTime(0);
+    setPlaybackState(PlaybackState.SONG_PAUSED);
   };
 
   const handleScrubberClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -286,6 +298,7 @@ export default function App() {
                     className={`${
                       i % 2 === 0 ? "bg-white/40" : "bg-white/20"
                     } hover:bg-blue-200/70 cursor-pointer`}
+                    onDoubleClick={() => handleTrackClick(track)}
                   >
                     <td className="px-4 py-2">{track.title}</td>
                     <td className="px-4 py-2">{track.artist}</td>
