@@ -222,7 +222,25 @@ export const useStore = create<StoreState>((set, get) => ({
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
-    const sourceTracks = (get()[sourceKey] || []) as Track[];
+
+    let sourceTracks: Track[] = [];
+
+    // Handle aggregation for discover and library sources
+    if (filterState.selectedSource === "discover") {
+      sourceTracks = [
+        ...(get().trending || []),
+        ...(get().underground || []),
+        ...(get().feelingLucky || []),
+      ];
+    } else if (filterState.selectedSource === "library") {
+      sourceTracks = [
+        ...(get().favorites || []),
+        ...(get().uploads || []),
+        ...(get().playlists || []),
+      ];
+    } else {
+      sourceTracks = (get()[sourceKey] || []) as Track[];
+    }
 
     let filtered = sourceTracks;
 
@@ -262,7 +280,25 @@ export const useStore = create<StoreState>((set, get) => ({
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
-    const sourceTracks = (get()[sourceKey] || []) as Track[];
+
+    let sourceTracks: Track[] = [];
+
+    if (filterState.selectedSource === "discover") {
+      sourceTracks = [
+        ...(get().trending || []),
+        ...(get().underground || []),
+        ...(get().feelingLucky || []),
+      ];
+    } else if (filterState.selectedSource === "library") {
+      sourceTracks = [
+        ...(get().favorites || []),
+        ...(get().uploads || []),
+        ...(get().playlists || []),
+      ];
+    } else {
+      sourceTracks = (get()[sourceKey] || []) as Track[];
+    }
+
     return [...new Set(sourceTracks.map((track) => track.genre))];
   },
   getUniqueArtists: () => {
@@ -274,7 +310,25 @@ export const useStore = create<StoreState>((set, get) => ({
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
-    const sourceTracks = (get()[sourceKey] || []) as Track[];
+
+    let sourceTracks: Track[] = [];
+
+    if (filterState.selectedSource === "discover") {
+      sourceTracks = [
+        ...(get().trending || []),
+        ...(get().underground || []),
+        ...(get().feelingLucky || []),
+      ];
+    } else if (filterState.selectedSource === "library") {
+      sourceTracks = [
+        ...(get().favorites || []),
+        ...(get().uploads || []),
+        ...(get().playlists || []),
+      ];
+    } else {
+      sourceTracks = (get()[sourceKey] || []) as Track[];
+    }
+
     return [...new Set(sourceTracks.map((track) => track.artist))];
   },
   getUniqueAlbums: () => {
@@ -286,7 +340,25 @@ export const useStore = create<StoreState>((set, get) => ({
     };
     const sourceKey =
       sourceMap[filterState.selectedSource] || filterState.selectedSource;
-    const sourceTracks = (get()[sourceKey] || []) as Track[];
+
+    let sourceTracks: Track[] = [];
+
+    if (filterState.selectedSource === "discover") {
+      sourceTracks = [
+        ...(get().trending || []),
+        ...(get().underground || []),
+        ...(get().feelingLucky || []),
+      ];
+    } else if (filterState.selectedSource === "library") {
+      sourceTracks = [
+        ...(get().favorites || []),
+        ...(get().uploads || []),
+        ...(get().playlists || []),
+      ];
+    } else {
+      sourceTracks = (get()[sourceKey] || []) as Track[];
+    }
+
     return [...new Set(sourceTracks.map((track) => track.album))];
   },
   setTracks: (source, tracks) => set((_state) => ({ [source]: tracks })),
