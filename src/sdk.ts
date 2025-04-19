@@ -22,6 +22,7 @@ const convertAudiusTrack = (track: Track, index: number, source: string) => ({
     .padStart(2, "0")}`,
   genre: track.genre,
   source,
+  artwork: track.artwork,
 });
 
 export const fetchTrendingTracks = async () => {

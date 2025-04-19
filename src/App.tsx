@@ -23,7 +23,7 @@ const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
     setCurrentTrack,
     setPlaybackState,
   } = useStore();
-  const [isHovered, setIsHovered] = useState(false);
+  const [, setIsHovered] = useState(false);
 
   const handleViewArtist = () => {
     setSelectedArtist(track.artist);
@@ -380,11 +380,17 @@ export default function App() {
             ))}
           </ul>
           <div className="mt-auto pt-4 border-t border-[#aac6e6]">
-            <div className="w-16 h-16 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
+            <div className="w-48 h-48 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
               {playbackState === PlaybackState.NO_SONG_SELECTED ? (
-                <span>🎵</span>
+                <span className="text-4xl">🎵</span>
+              ) : currentTrack?.artwork?._150x150 ? (
+                <img
+                  src={currentTrack.artwork._150x150}
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <span className="text-2xl">
+                <span className="text-4xl">
                   {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
                 </span>
               )}
