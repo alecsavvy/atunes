@@ -1092,9 +1092,9 @@ export default function App() {
         </div>
         <button
           onClick={toggleTheme}
-          className="absolute right-4 bottom-2 text-xs px-3 py-1 rounded-full aqua-button"
+          className="absolute right-4 w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
         >
-          {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
+          {isDark ? "☀️" : "🌙"}
         </button>
       </div>
 
