@@ -10,6 +10,8 @@ import {
 import Login from "./Login";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 
 interface ContextMenuProps {
   track: Track;
@@ -179,16 +181,11 @@ export default function App() {
     setVolume,
   } = useStore();
 
-  const [localVolume, setLocalVolume] = useState(volume);
+  const [localVolume, setLocalVolume] = useState(0.7);
 
   const audioPlayerRef = useRef<AudioPlayer>(null);
 
   const [audioSource, setAudioSource] = useState<string | null>(null);
-
-  // Update local volume when store volume changes (e.g. from other components)
-  useEffect(() => {
-    setLocalVolume(volume);
-  }, [volume]);
 
   // Debounced volume update
   const debouncedSetVolume = useCallback(
@@ -420,18 +417,61 @@ export default function App() {
                 </svg>
               </button>
             </div>
-            <div className="flex items-center gap-2 w-full px-2">
-              <span className="text-xs">🔈</span>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={localVolume}
-                onChange={(e) => debouncedSetVolume(parseFloat(e.target.value))}
-                className="w-24 h-1 bg-[#e1dba7] rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#7fa6d9]"
-              />
-              <span className="text-xs">🔊</span>
+            <div className="flex items-center gap-2 w-full px-2 mt-1">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-zinc-800"
+              >
+                <path
+                  d="M3 9v6h4l5 5V4L7 9H3zm11-.17v6.34L11.13 13H7v-2h4.13L14 8.83z"
+                  fill="currentColor"
+                />
+              </svg>
+              <div className="w-28 -my-4 cursor-pointer">
+                <Slider
+                  value={localVolume}
+                  onChange={(value) => debouncedSetVolume(value as number)}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  className="volume-slider"
+                  styles={{
+                    track: {
+                      backgroundColor: "#c0b8a0",
+                      height: 2,
+                    },
+                    rail: {
+                      backgroundColor: "#fdfae7",
+                      height: 2,
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
+                    },
+                    handle: {
+                      height: 12,
+                      width: 12,
+                      marginTop: -5,
+                      backgroundColor: "#f8f8f8",
+                      border: "1px solid #a0a0a0",
+                      boxShadow:
+                        "0 2px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8)",
+                    },
+                  }}
+                />
+              </div>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-zinc-800"
+              >
+                <path
+                  d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+                  fill="currentColor"
+                />
+              </svg>
             </div>
           </div>
         </div>

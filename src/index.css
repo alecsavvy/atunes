@@ -136,3 +136,36 @@ table thead {
   animation-play-state: running;
   animation-duration: 20s;
 }
+
+.volume-slider {
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.volume-slider .rc-slider-handle {
+  transition: transform 0.1s ease-out, background-color 0.1s ease-out,
+    box-shadow 0.1s ease-out;
+  cursor: grab;
+}
+
+.volume-slider.rc-slider-dragging {
+  cursor: grabbing;
+}
+
+.volume-slider.rc-slider-dragging .rc-slider-handle {
+  cursor: grabbing;
+}
+
+.volume-slider .rc-slider-handle:active {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background-color: #f0f0f0;
+  transform: scale(1) translateY(1px);
+}
+
+.volume-slider .rc-slider-handle:hover {
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background-color: #ffffff;
+  border-color: #808080;
+}
