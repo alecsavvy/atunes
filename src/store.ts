@@ -205,6 +205,7 @@ export const useStore = create<StoreState>((set, get) => ({
   setSelectedSource: (source) =>
     set((state) => ({
       filterState: { ...state.filterState, selectedSource: source },
+      showQueue: false,
     })),
   setSelectedGenre: (genre) =>
     set((state) => ({
