@@ -247,6 +247,12 @@ export const useStore = create<StoreState>((set, get) => ({
       filtered = [...filtered].sort(() => Math.random() - 0.5);
     }
 
+    // For played tracks, maintain the order of most recent first
+    if (filterState.selectedSource === "played-tracks") {
+      return filtered;
+    }
+
+    // For other sources, apply the normal sorting
     return filtered.sort((a, b) => {
       const comparison = a.title.localeCompare(b.title);
       return filterState.sortAsc ? comparison : -comparison;
@@ -381,10 +387,10 @@ export const useStore = create<StoreState>((set, get) => ({
         playedTracks: [
           track,
           ...state.playedTracks.filter((t) => t.id !== track.id),
-        ].slice(0, 100), // Keep last 100 played tracks
+        ].slice(0, 100),
         feelingLucky: [...state.trending, ...state.underground]
           .sort(() => Math.random() - 0.5)
-          .slice(0, 50), // Mix of trending and underground tracks
+          .slice(0, 50),
       }));
     } else {
       set({
