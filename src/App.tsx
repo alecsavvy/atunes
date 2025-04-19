@@ -17,7 +17,12 @@ interface ContextMenuProps {
 }
 
 const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
-  const { setSelectedArtist, setSelectedGenre } = useStore();
+  const {
+    setSelectedArtist,
+    setSelectedGenre,
+    setCurrentTrack,
+    setPlaybackState,
+  } = useStore();
   const [isHovered, setIsHovered] = useState(false);
 
   const handleViewArtist = () => {
@@ -27,6 +32,12 @@ const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
 
   const handleViewGenre = () => {
     setSelectedGenre(track.genre);
+    onClose();
+  };
+
+  const handlePlay = () => {
+    setCurrentTrack(track);
+    setPlaybackState(PlaybackState.SONG_PLAYING);
     onClose();
   };
 
@@ -44,6 +55,12 @@ const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
         className="bg-white dark:bg-zinc-800 shadow-lg rounded-md py-2 border border-zinc-200 dark:border-zinc-700"
         onClick={(e) => e.stopPropagation()}
       >
+        <div
+          className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          onClick={handlePlay}
+        >
+          Play
+        </div>
         <div
           className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
           onClick={handleViewArtist}
