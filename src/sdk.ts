@@ -127,12 +127,25 @@ export const fetchPlaylistsByUser = async (userId: string) => {
         convertAudiusTrack(track, index, playlistSource)
       );
       useStore.getState().setTracks(playlistSource, convertedTracks);
-      // Add dynamic source for this playlist
-      useStore.getState().addDynamicSource({
-        id: playlistSource,
-        label: `🎵 ${playlist.playlistName}`,
-        type: "dynamic",
+      // Add dynamic source for this playlist under the library section
+      const store = useStore.getState();
+      const updatedSources = store.sources.map((source) => {
+        if (source.id === "library") {
+          return {
+            ...source,
+            children: [
+              ...(source.children || []),
+              {
+                id: playlistSource,
+                label: `🎵 ${playlist.playlistName}`,
+                type: "dynamic" as const,
+              },
+            ],
+          };
+        }
+        return source;
       });
+      store.setSources(updatedSources);
     })
   );
 };

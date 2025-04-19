@@ -380,16 +380,36 @@ export default function App() {
         {/* Sidebar */}
         <div className="w-64 border-r border-[#7fa6d9] p-4 overflow-y-auto flex flex-col brushed-metal">
           <div className="font-bold mb-4">Source</div>
-          <ul className="space-y-2 text-sm mb-6">
+          <ul className="space-y-4 text-sm mb-6">
             {sources.map((source) => (
-              <li
-                key={source.id}
-                className={`cursor-pointer hover:bg-[#cce6ff] ${
-                  filterState.selectedSource === source.id ? "bg-[#cce6ff]" : ""
-                }`}
-                onClick={() => setSelectedSource(source.id)}
-              >
-                {source.label}
+              <li key={source.id} className="space-y-1">
+                <div
+                  className={`cursor-pointer hover:bg-[#cce6ff] px-2 py-1 rounded ${
+                    filterState.selectedSource === source.id
+                      ? "bg-[#cce6ff]"
+                      : ""
+                  }`}
+                  onClick={() => setSelectedSource(source.id)}
+                >
+                  {source.label}
+                </div>
+                {source.children && (
+                  <ul className="ml-4 space-y-1">
+                    {source.children.map((child) => (
+                      <li
+                        key={child.id}
+                        className={`cursor-pointer hover:bg-[#cce6ff] px-2 py-1 rounded ${
+                          filterState.selectedSource === child.id
+                            ? "bg-[#cce6ff]"
+                            : ""
+                        }`}
+                        onClick={() => setSelectedSource(child.id)}
+                      >
+                        {child.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

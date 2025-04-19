@@ -31,12 +31,17 @@ export type Track = {
 
 type FilterState = {
   selectedSource:
-    | "library"
+    | "discover"
     | "trending"
     | "underground"
+    | "feeling-lucky"
+    | "library"
     | "favorites"
-    | "playlists"
     | "uploads"
+    | "playlists"
+    | "recents"
+    | "searches"
+    | "played-tracks"
     | string;
   selectedGenre: string | null;
   selectedArtist: string | null;
@@ -48,6 +53,7 @@ type SourceConfig = {
   id: FilterState["selectedSource"] | string;
   label: string;
   type: "static" | "dynamic";
+  children?: readonly SourceConfig[];
 };
 
 type StoreState = {
@@ -57,6 +63,9 @@ type StoreState = {
   favorites: Track[];
   playlists: Track[];
   uploads: Track[];
+  searches: Track[];
+  playedTracks: Track[];
+  feelingLucky: Track[];
   currentTrack: Track | null;
   playbackState: PlaybackState;
   currentTime: number;
@@ -67,7 +76,7 @@ type StoreState = {
     | FilterState
     | DecodedUserToken
     | null
-    | SourceConfig[]
+    | readonly SourceConfig[]
     | number
     | boolean
     | Track
@@ -75,7 +84,7 @@ type StoreState = {
     | ((...args: any[]) => any);
   filterState: FilterState;
   userState: DecodedUserToken | null;
-  sources: SourceConfig[];
+  sources: readonly SourceConfig[];
   setSelectedSource: (source: FilterState["selectedSource"]) => void;
   setSelectedGenre: (genre: string | null) => void;
   setSelectedArtist: (artist: string | null) => void;
@@ -106,6 +115,9 @@ export const useStore = create<StoreState>((set, get) => ({
   favorites: [],
   playlists: [],
   uploads: [],
+  searches: [],
+  playedTracks: [],
+  feelingLucky: [],
   currentTrack: null,
   playbackState: PlaybackState.NO_SONG_SELECTED,
   currentTime: 0,
@@ -120,12 +132,61 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   userState: null,
   sources: [
-    { id: "library" as const, label: "📚 Library", type: "static" as const },
-    { id: "trending" as const, label: "🔥 Trending", type: "static" as const },
     {
-      id: "underground" as const,
-      label: "🔊 Underground",
+      id: "discover" as const,
+      label: "🔍 Discover",
       type: "static" as const,
+      children: [
+        {
+          id: "trending" as const,
+          label: "🔥 Trending",
+          type: "static" as const,
+        },
+        {
+          id: "underground" as const,
+          label: "🔊 Underground",
+          type: "static" as const,
+        },
+        {
+          id: "feeling-lucky" as const,
+          label: "🎲 Feeling Lucky",
+          type: "static" as const,
+        },
+      ],
+    },
+    {
+      id: "library" as const,
+      label: "📚 Library",
+      type: "static" as const,
+      children: [
+        {
+          id: "favorites" as const,
+          label: "💖 Favorites",
+          type: "static" as const,
+        },
+        {
+          id: "uploads" as const,
+          label: "💿 Uploads",
+          type: "static" as const,
+        },
+      ],
+    },
+    {
+      id: "recents" as const,
+      label: "⏱️ Recents",
+      type: "static" as const,
+      children: [
+        {
+          id: "searches" as const,
+          label: "🔎 Searches",
+          type: "static" as const,
+        },
+        {
+          id: "played-tracks" as const,
+          label: "🎵 Played Tracks",
+          type: "static" as const,
+        },
+      ],
     },
   ],
   setSelectedSource: (source) =>
@@ -153,7 +214,14 @@ export const useStore = create<StoreState>((set, get) => ({
     })),
   getFilteredTracks: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource] as Track[];
+    const sourceMap: Record<string, string> = {
+      "played-tracks": "playedTracks",
+      searches: "searches",
+      "feeling-lucky": "feelingLucky",
+    };
+    const sourceKey =
+      sourceMap[filterState.selectedSource] || filterState.selectedSource;
+    const sourceTracks = (get()[sourceKey] || []) as Track[];
 
     let filtered = sourceTracks;
 
@@ -173,6 +241,11 @@ export const useStore = create<StoreState>((set, get) => ({
       );
     }
 
+    // If feeling lucky, shuffle the tracks
+    if (filterState.selectedSource === "feeling-lucky") {
+      filtered = [...filtered].sort(() => Math.random() - 0.5);
+    }
+
     return filtered.sort((a, b) => {
       const comparison = a.title.localeCompare(b.title);
       return filterState.sortAsc ? comparison : -comparison;
@@ -180,17 +253,38 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   getUniqueGenres: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource] as Track[];
+    const sourceMap: Record<string, string> = {
+      "played-tracks": "playedTracks",
+      searches: "searches",
+      "feeling-lucky": "feelingLucky",
+    };
+    const sourceKey =
+      sourceMap[filterState.selectedSource] || filterState.selectedSource;
+    const sourceTracks = (get()[sourceKey] || []) as Track[];
     return [...new Set(sourceTracks.map((track) => track.genre))];
   },
   getUniqueArtists: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource] as Track[];
+    const sourceMap: Record<string, string> = {
+      "played-tracks": "playedTracks",
+      searches: "searches",
+      "feeling-lucky": "feelingLucky",
+    };
+    const sourceKey =
+      sourceMap[filterState.selectedSource] || filterState.selectedSource;
+    const sourceTracks = (get()[sourceKey] || []) as Track[];
     return [...new Set(sourceTracks.map((track) => track.artist))];
   },
   getUniqueAlbums: () => {
     const { filterState } = get();
-    const sourceTracks = get()[filterState.selectedSource] as Track[];
+    const sourceMap: Record<string, string> = {
+      "played-tracks": "playedTracks",
+      searches: "searches",
+      "feeling-lucky": "feelingLucky",
+    };
+    const sourceKey =
+      sourceMap[filterState.selectedSource] || filterState.selectedSource;
+    const sourceTracks = (get()[sourceKey] || []) as Track[];
     return [...new Set(sourceTracks.map((track) => track.album))];
   },
   setTracks: (source, tracks) => set((_state) => ({ [source]: tracks })),
@@ -208,38 +302,67 @@ export const useStore = create<StoreState>((set, get) => ({
   setSources: (sources) => set({ sources }),
   updateSources: (userState) => {
     const baseSources = [
-      { id: "library" as const, label: "📚 Library", type: "static" as const },
       {
-        id: "trending" as const,
-        label: "🔥 Trending",
+        id: "discover" as const,
+        label: "🔍 Discover",
         type: "static" as const,
-      },
-      {
-        id: "underground" as const,
-        label: "🔊 Underground",
-        type: "static" as const,
-      },
-    ];
-
-    if (userState) {
-      set({
-        sources: [
-          ...baseSources,
+        children: [
           {
-            id: "uploads" as const,
-            label: "💿 Uploads",
+            id: "trending" as const,
+            label: "🔥 Trending",
             type: "static" as const,
           },
           {
-            id: "favorites" as const,
-            label: "💖 Favorites",
+            id: "underground" as const,
+            label: "🔊 Underground",
+            type: "static" as const,
+          },
+          {
+            id: "feeling-lucky" as const,
+            label: "🎲 Feeling Lucky",
             type: "static" as const,
           },
         ],
-      });
-    } else {
-      set({ sources: baseSources });
-    }
+      },
+      {
+        id: "library" as const,
+        label: "📚 Library",
+        type: "static" as const,
+        children: userState
+          ? [
+              {
+                id: "favorites" as const,
+                label: "💖 Favorites",
+                type: "static" as const,
+              },
+              {
+                id: "uploads" as const,
+                label: "💿 Uploads",
+                type: "static" as const,
+              },
+            ]
+          : [],
+      },
+      {
+        id: "recents" as const,
+        label: "⏱️ Recents",
+        type: "static" as const,
+        children: [
+          {
+            id: "searches" as const,
+            label: "🔎 Searches",
+            type: "static" as const,
+          },
+          {
+            id: "played-tracks" as const,
+            label: "🎵 Played Tracks",
+            type: "static" as const,
+          },
+        ],
+      },
+    ] as const;
+
+    set({ sources: baseSources });
   },
   addDynamicSource: (source) =>
     set((state) => ({
@@ -249,13 +372,26 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => ({
       sources: state.sources.filter((source) => source.id !== sourceId),
     })),
-  setCurrentTrack: (track) =>
-    set({
-      currentTrack: track,
-      playbackState: track
-        ? PlaybackState.SONG_PAUSED
-        : PlaybackState.NO_SONG_SELECTED,
-    }),
+  setCurrentTrack: (track) => {
+    if (track) {
+      set((state) => ({
+        currentTrack: track,
+        playbackState: PlaybackState.SONG_PAUSED,
+        playedTracks: [
+          track,
+          ...state.playedTracks.filter((t) => t.id !== track.id),
+        ].slice(0, 100), // Keep last 100 played tracks
+        feelingLucky: [...state.trending, ...state.underground]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 50), // Mix of trending and underground tracks
+      }));
+    } else {
+      set({
+        currentTrack: null,
+        playbackState: PlaybackState.NO_SONG_SELECTED,
+      });
+    }
+  },
   setPlaybackState: (state) => set({ playbackState: state }),
   setCurrentTime: (currentTime) =>
     set((state) => ({
