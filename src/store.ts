@@ -48,7 +48,16 @@ type FilterState = {
   selectedGenre: string | null;
   selectedArtist: string | null;
   selectedAlbum: string | null;
-  sortAsc: boolean;
+  sortBy:
+    | "title"
+    | "artist"
+    | "album"
+    | "genre"
+    | "releaseDate"
+    | "duration"
+    | "playCount"
+    | null;
+  sortAsc: boolean | null;
 };
 
 type SourceConfig = {
@@ -87,7 +96,7 @@ type StoreState = {
   setSelectedGenre: (genre: string | null) => void;
   setSelectedArtist: (artist: string | null) => void;
   setSelectedAlbum: (album: string | null) => void;
-  toggleSort: () => void;
+  toggleSort: (column: FilterState["sortBy"]) => void;
   getFilteredTracks: () => Track[];
   getUniqueGenres: () => string[];
   getUniqueArtists: () => string[];
@@ -114,37 +123,7 @@ type StoreState = {
   toggleLoop: () => void;
   toggleShuffle: () => void;
   toggleTheme: () => void;
-  [key: string]:
-    | Track[]
-    | FilterState
-    | DecodedUserToken
-    | null
-    | readonly SourceConfig[]
-    | number
-    | boolean
-    | Track
-    | PlaybackState
-    | ((...args: unknown[]) => unknown)
-    | ((source: string) => void)
-    | ((genre: string | null) => void)
-    | ((artist: string | null) => void)
-    | ((album: string | null) => void)
-    | (() => void)
-    | (() => Track[])
-    | (() => string[])
-    | ((source: string, tracks: Track[]) => void)
-    | ((userState: DecodedUserToken) => void)
-    | ((sources: SourceConfig[]) => void)
-    | ((userState: DecodedUserToken | null) => void)
-    | ((source: SourceConfig) => void)
-    | ((sourceId: string) => void)
-    | ((track: Track | null) => void)
-    | ((state: PlaybackState) => void)
-    | ((currentTime: number | ((prev: number) => number)) => void)
-    | ((duration: number) => void)
-    | ((volume: number) => void)
-    | ((track: Track) => void)
-    | ((index: number) => void);
+  [key: string]: any;
 };
 
 export const useStore = create<StoreState>((set, get) => {
@@ -199,7 +178,8 @@ export const useStore = create<StoreState>((set, get) => {
       selectedGenre: null,
       selectedArtist: null,
       selectedAlbum: null,
-      sortAsc: true,
+      sortBy: null,
+      sortAsc: null,
     },
     userState: null,
     sources: [
@@ -274,13 +254,38 @@ export const useStore = create<StoreState>((set, get) => {
       set((state) => ({
         filterState: { ...state.filterState, selectedAlbum: album },
       })),
-    toggleSort: () =>
-      set((state) => ({
-        filterState: {
-          ...state.filterState,
-          sortAsc: !state.filterState.sortAsc,
-        },
-      })),
+    toggleSort: (column: FilterState["sortBy"]) =>
+      set((state) => {
+        // If clicking a different column, start with ascending
+        if (state.filterState.sortBy !== column) {
+          return {
+            filterState: {
+              ...state.filterState,
+              sortBy: column,
+              sortAsc: true,
+            },
+          };
+        }
+
+        // If currently ascending, switch to descending
+        if (state.filterState.sortAsc === true) {
+          return {
+            filterState: {
+              ...state.filterState,
+              sortAsc: false,
+            },
+          };
+        }
+
+        // If currently descending, remove sort
+        return {
+          filterState: {
+            ...state.filterState,
+            sortBy: null,
+            sortAsc: null,
+          },
+        };
+      }),
     getFilteredTracks: () => {
       const { filterState } = get();
       const sourceMap: Record<string, string> = {
@@ -344,8 +349,41 @@ export const useStore = create<StoreState>((set, get) => {
       }
 
       // For other sources, apply the normal sorting
+      if (filterState.sortBy === null) {
+        // Return to original order by sorting by index
+        return filtered.sort((a, b) => a.index - b.index);
+      }
+
       return filtered.sort((a, b) => {
-        const comparison = a.title.localeCompare(b.title);
+        let comparison = 0;
+        switch (filterState.sortBy) {
+          case "title":
+            comparison = a.title.localeCompare(b.title);
+            break;
+          case "artist":
+            comparison = a.artist.localeCompare(b.artist);
+            break;
+          case "album":
+            comparison = a.album.localeCompare(b.album);
+            break;
+          case "genre":
+            comparison = a.genre.localeCompare(b.genre);
+            break;
+          case "releaseDate":
+            // Convert dates to timestamps for proper chronological sorting
+            const aDate = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+            const bDate = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+            comparison = aDate - bDate;
+            break;
+          case "duration":
+            const [aMins, aSecs] = a.duration.split(":").map(Number);
+            const [bMins, bSecs] = b.duration.split(":").map(Number);
+            comparison = aMins * 60 + aSecs - (bMins * 60 + bSecs);
+            break;
+          case "playCount":
+            comparison = (a.playCount || 0) - (b.playCount || 0);
+            break;
+        }
         return filterState.sortAsc ? comparison : -comparison;
       });
     },

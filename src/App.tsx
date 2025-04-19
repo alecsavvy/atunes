@@ -1154,16 +1154,88 @@ export default function App() {
                       <tr>
                         <th
                           className="px-4 py-2 cursor-pointer"
-                          onClick={toggleSort}
+                          onClick={() => toggleSort("title")}
                         >
-                          Title {filterState.sortAsc ? "↑" : "↓"}
+                          Title{" "}
+                          {filterState.sortBy === "title" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
                         </th>
-                        <th className="px-4 py-2">Artist</th>
-                        <th className="px-4 py-2">Album</th>
-                        <th className="px-4 py-2">Genre</th>
-                        <th className="px-4 py-2 text-right">Release Date</th>
-                        <th className="px-4 py-2 text-right">Duration</th>
-                        <th className="px-4 py-2 text-right">Plays</th>
+                        <th
+                          className="px-4 py-2 cursor-pointer"
+                          onClick={() => toggleSort("artist")}
+                        >
+                          Artist{" "}
+                          {filterState.sortBy === "artist" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
+                        </th>
+                        <th
+                          className="px-4 py-2 cursor-pointer"
+                          onClick={() => toggleSort("album")}
+                        >
+                          Album{" "}
+                          {filterState.sortBy === "album" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
+                        </th>
+                        <th
+                          className="px-4 py-2 cursor-pointer"
+                          onClick={() => toggleSort("genre")}
+                        >
+                          Genre{" "}
+                          {filterState.sortBy === "genre" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
+                        </th>
+                        <th
+                          className="px-4 py-2 text-right cursor-pointer"
+                          onClick={() => toggleSort("releaseDate")}
+                        >
+                          Release Date{" "}
+                          {filterState.sortBy === "releaseDate" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
+                        </th>
+                        <th
+                          className="px-4 py-2 text-right cursor-pointer"
+                          onClick={() => toggleSort("duration")}
+                        >
+                          Duration{" "}
+                          {filterState.sortBy === "duration" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
+                        </th>
+                        <th
+                          className="px-4 py-2 text-right cursor-pointer"
+                          onClick={() => toggleSort("playCount")}
+                        >
+                          Plays{" "}
+                          {filterState.sortBy === "playCount" &&
+                            (filterState.sortAsc === true
+                              ? "↑"
+                              : filterState.sortAsc === false
+                              ? "↓"
+                              : "")}
+                        </th>
                       </tr>
                     </thead>
                   </table>
