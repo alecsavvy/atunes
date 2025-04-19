@@ -165,6 +165,9 @@ export default function App() {
     track: Track;
     position: { x: number; y: number };
   } | null>(null);
+  const [expandedSources, setExpandedSources] = useState<Set<string>>(
+    new Set(["discover"])
+  );
 
   const {
     filterState,
@@ -387,6 +390,37 @@ export default function App() {
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
+
+  const handleSourceDoubleClick = (sourceId: string) => {
+    setExpandedSources((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(sourceId)) {
+        newSet.delete(sourceId);
+      } else {
+        newSet.add(sourceId);
+      }
+      return newSet;
+    });
+  };
+
+  // Update expanded sources when user logs in
+  useEffect(() => {
+    const userState = getUserState();
+    if (userState) {
+      setExpandedSources((prev) => {
+        const newSet = new Set(prev);
+        newSet.add("library");
+        return newSet;
+      });
+    } else {
+      // When logged out, collapse library
+      setExpandedSources((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete("library");
+        return newSet;
+      });
+    }
+  }, [getUserState, getUserState()]);
 
   return (
     <div
@@ -757,6 +791,7 @@ export default function App() {
                       : ""
                   }`}
                   onClick={() => setSelectedSource(source.id)}
+                  onDoubleClick={() => handleSourceDoubleClick(source.id)}
                 >
                   {typeof source.icon === "string" &&
                   source.icon.startsWith("http") ? (
@@ -769,10 +804,17 @@ export default function App() {
                       {source.label}
                     </div>
                   ) : (
-                    source.label
+                    <div className="flex items-center gap-2">
+                      {source.children && (
+                        <span className="text-xs">
+                          {expandedSources.has(source.id) ? "▼" : "▶"}
+                        </span>
+                      )}
+                      {source.label}
+                    </div>
                   )}
                 </div>
-                {source.children && (
+                {source.children && expandedSources.has(source.id) && (
                   <ul className="ml-4 space-y-1">
                     {source.children.map((child) => (
                       <li
