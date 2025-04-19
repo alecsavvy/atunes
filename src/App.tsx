@@ -116,10 +116,10 @@ export default function App() {
             <div className="w-full h-full flex flex-col justify-center px-6">
               <div className="flex items-center justify-center mb-6">
                 <div className="text-center">
-                  <div className="text-sm font-medium truncate">
+                  <div className="text-xs font-medium truncate">
                     {currentTrack?.title || "No track playing"}
                   </div>
-                  <div className="text-xs text-zinc-600 truncate">
+                  <div className="text-[10px] text-zinc-600 truncate">
                     {currentTrack?.artist || "No artist"}
                   </div>
                 </div>
