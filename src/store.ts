@@ -77,17 +77,6 @@ type StoreState = {
   showQueue: boolean;
   loop: boolean;
   shuffle: boolean;
-  [key: string]:
-    | Track[]
-    | FilterState
-    | DecodedUserToken
-    | null
-    | readonly SourceConfig[]
-    | number
-    | boolean
-    | Track
-    | PlaybackState
-    | ((...args: any[]) => any);
   filterState: FilterState;
   userState: DecodedUserToken | null;
   sources: readonly SourceConfig[];
@@ -121,6 +110,37 @@ type StoreState = {
   previousTrack: () => void;
   toggleLoop: () => void;
   toggleShuffle: () => void;
+  [key: string]:
+    | Track[]
+    | FilterState
+    | DecodedUserToken
+    | null
+    | readonly SourceConfig[]
+    | number
+    | boolean
+    | Track
+    | PlaybackState
+    | ((...args: unknown[]) => unknown)
+    | ((source: string) => void)
+    | ((genre: string | null) => void)
+    | ((artist: string | null) => void)
+    | ((album: string | null) => void)
+    | (() => void)
+    | (() => Track[])
+    | (() => string[])
+    | ((source: string, tracks: Track[]) => void)
+    | ((userState: DecodedUserToken) => void)
+    | ((sources: SourceConfig[]) => void)
+    | ((userState: DecodedUserToken | null) => void)
+    | ((source: SourceConfig) => void)
+    | ((sourceId: string) => void)
+    | ((track: Track | null) => void)
+    | ((state: PlaybackState) => void)
+    | ((currentTime: number | ((prev: number) => number)) => void)
+    | ((duration: number) => void)
+    | ((volume: number) => void)
+    | ((track: Track) => void)
+    | ((index: number) => void);
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -383,7 +403,7 @@ export const useStore = create<StoreState>((set, get) => ({
 
     return [...new Set(sourceTracks.map((track) => track.album))];
   },
-  setTracks: (source, tracks) => set((_state) => ({ [source]: tracks })),
+  setTracks: (source, tracks) => set(() => ({ [source]: tracks })),
   setUserState: (userState: DecodedUserToken) => {
     set({ userState });
     // Pre-fetch favorites when user logs in

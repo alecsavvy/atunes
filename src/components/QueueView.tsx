@@ -1,12 +1,11 @@
 import React from "react";
-import { useStore, PlaybackState } from "../store";
+import { useStore } from "../store";
 
 export const QueueView: React.FC = () => {
   const {
     currentTrack,
     queue,
     currentQueueIndex,
-    playbackState,
     removeFromQueue,
     skipToTrack,
   } = useStore();

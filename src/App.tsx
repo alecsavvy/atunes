@@ -203,8 +203,6 @@ export default function App() {
     toggleShuffle,
     loop,
     shuffle,
-    nextTrack,
-    previousTrack,
   } = useStore();
 
   const [localVolume, setLocalVolume] = useState(0.7);
@@ -317,7 +315,12 @@ export default function App() {
     setSelectedGenre(null);
     setSelectedArtist(null);
     setSelectedAlbum(null);
-  }, [filterState.selectedSource]);
+  }, [
+    filterState.selectedSource,
+    setSelectedGenre,
+    setSelectedArtist,
+    setSelectedAlbum,
+  ]);
 
   useEffect(() => {
     if (currentTrack && !audioSource) {
