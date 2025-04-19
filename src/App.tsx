@@ -496,7 +496,7 @@ export default function App() {
 
       {/* Top bar */}
       <div className="relative flex items-center justify-between px-4 py-4 border-b border-[#999] shadow-inner brushed-metal">
-        <div className="flex items-center gap-2">
+        <div className="w-[200px] flex items-center gap-2">
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-3">
               {/* ===== PREVIOUS TRACK BUTTON =====
@@ -723,54 +723,56 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="relative min-w-[50%] h-[60px] rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 flex items-center justify-center">
-          {playbackState === PlaybackState.NO_SONG_SELECTED ? (
-            <img src={AudiusGlyph} alt="Audius" className="w-6 h-6" />
-          ) : (
-            <div className="w-full h-full flex flex-col justify-center px-6">
-              <div className="flex items-center justify-center mb-6">
-                <div className="text-center">
-                  <div className="text-xs font-medium truncate">
-                    {currentTrack?.title || "No track playing"}
-                  </div>
-                  <div className="text-[10px] text-zinc-600 truncate">
-                    {currentTrack?.artist || "No artist"}
+        <div className="flex-1 flex justify-center">
+          <div className="relative w-[600px] h-[60px] rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 flex items-center justify-center">
+            {playbackState === PlaybackState.NO_SONG_SELECTED ? (
+              <img src={AudiusGlyph} alt="Audius" className="w-6 h-6" />
+            ) : (
+              <div className="w-full h-full flex flex-col justify-center px-6">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="text-center">
+                    <div className="text-xs font-medium truncate">
+                      {currentTrack?.title || "No track playing"}
+                    </div>
+                    <div className="text-[10px] text-zinc-600 truncate">
+                      {currentTrack?.artist || "No artist"}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="absolute bottom-2 left-6 right-6 flex items-center gap-2">
-                <span className="text-xs text-zinc-600">
-                  {formatTime(currentTime)}
-                </span>
-                <div className="flex-1 h-4 flex items-center relative">
-                  <div
-                    className="w-full h-1 bg-[#e1dba7] rounded-full overflow-hidden cursor-pointer"
-                    onClick={handleScrubberClick}
-                  >
+                <div className="absolute bottom-2 left-6 right-6 flex items-center gap-2">
+                  <span className="text-xs text-zinc-600">
+                    {formatTime(currentTime)}
+                  </span>
+                  <div className="flex-1 h-4 flex items-center relative">
                     <div
-                      className="h-full bg-[#E6C7FF] rounded-full"
-                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                      className="w-full h-1 bg-[#e1dba7] rounded-full overflow-hidden cursor-pointer"
+                      onClick={handleScrubberClick}
+                    >
+                      <div
+                        className="h-full bg-[#E6C7FF] rounded-full"
+                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                      />
+                    </div>
+                    <div
+                      className="absolute h-1.5 w-1.5 rounded-full bg-[#4a1a7a]"
+                      style={{
+                        left: `calc(${
+                          (currentTime / duration) * 100
+                        }% - 0.375rem)`,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                      }}
                     />
                   </div>
-                  <div
-                    className="absolute h-1.5 w-1.5 rounded-full bg-[#4a1a7a]"
-                    style={{
-                      left: `calc(${
-                        (currentTime / duration) * 100
-                      }% - 0.375rem)`,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                    }}
-                  />
+                  <span className="text-xs text-zinc-600">
+                    {formatTime(duration)}
+                  </span>
                 </div>
-                <span className="text-xs text-zinc-600">
-                  {formatTime(duration)}
-                </span>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="w-[200px] flex items-center justify-end gap-2">
           {getUserState() ? (
             <img
               src={getUserState()?.profilePicture?.["_480x480"] || ""}
