@@ -393,9 +393,9 @@ export default function App() {
             <div className="w-48 h-48 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
               {playbackState === PlaybackState.NO_SONG_SELECTED ? (
                 <span className="text-4xl">🎵</span>
-              ) : currentTrack?.artwork?._150x150 ? (
+              ) : currentTrack?.artwork?._1000x1000 ? (
                 <img
-                  src={currentTrack.artwork._150x150}
+                  src={currentTrack.artwork._1000x1000}
                   alt={currentTrack.title}
                   className="w-full h-full object-cover"
                 />
