@@ -21,6 +21,10 @@ const convertAudiusTrack = (track: Track, index: number, source: string) => ({
     .toString()
     .padStart(2, "0")}`,
   genre: track.genre,
+  playCount: track.playCount,
+  releaseDate: track.releaseDate
+    ? new Date(track.releaseDate).toISOString().split("T")[0]
+    : undefined,
   source,
   artwork: track.artwork,
 });

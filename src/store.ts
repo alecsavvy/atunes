@@ -20,6 +20,8 @@ export type Track = {
   album: string;
   duration: string;
   genre: string;
+  playCount?: number;
+  releaseDate?: string;
   artwork?: {
     _150x150?: string;
     _480x480?: string;

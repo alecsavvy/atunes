@@ -491,8 +491,10 @@ export default function App() {
                     </th>
                     <th className="px-4 py-2">Artist</th>
                     <th className="px-4 py-2">Album</th>
-                    <th className="px-4 py-2 text-right">Time</th>
-                    <th className="px-4 py-2 text-right">Genre</th>
+                    <th className="px-4 py-2">Genre</th>
+                    <th className="px-4 py-2 text-right">Release Date</th>
+                    <th className="px-4 py-2 text-right">Duration</th>
+                    <th className="px-4 py-2 text-right">Plays</th>
                   </tr>
                 </thead>
               </table>
@@ -512,8 +514,14 @@ export default function App() {
                       <td className="px-4 py-2">{track.title}</td>
                       <td className="px-4 py-2">{track.artist}</td>
                       <td className="px-4 py-2">{track.album}</td>
+                      <td className="px-4 py-2">{track.genre}</td>
+                      <td className="px-4 py-2 text-right">
+                        {track.releaseDate || "-"}
+                      </td>
                       <td className="px-4 py-2 text-right">{track.duration}</td>
-                      <td className="px-4 py-2 text-right">{track.genre}</td>
+                      <td className="px-4 py-2 text-right">
+                        {track.playCount?.toLocaleString() || "-"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
