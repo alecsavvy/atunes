@@ -441,69 +441,80 @@ export default function App() {
                 key={section.title}
                 className={`w-1/3 ${
                   idx < 2 ? "border-r border-[#bbb]" : ""
-                } overflow-y-auto`}
+                } flex flex-col`}
               >
                 <div className="filter-title bg-gradient-to-b from-[#f2f2f2] to-[#cfcfcf] border-b border-[#999] box-shadow-[inset_0_-1px_0_#aaa] px-4 py-2 font-bold">
                   {section.title}
                 </div>
-                <ul className="flex flex-col">
-                  <li
-                    className={`cursor-pointer px-4 py-2 hover:bg-blue-200/70 ${
-                      !section.selected ? "bg-blue-200/70" : ""
-                    }`}
-                    onClick={() => section.setSelected(null)}
-                  >
-                    All ({section.items.length} {section.title})
-                  </li>
-                  {section.items.map((item) => (
+                <div className="flex-1 overflow-y-auto">
+                  <ul className="flex flex-col">
                     <li
-                      key={item}
                       className={`cursor-pointer px-4 py-2 hover:bg-blue-200/70 ${
-                        section.selected === item ? "bg-blue-200/70" : ""
+                        !section.selected ? "bg-blue-200/70" : ""
                       }`}
-                      onClick={() => section.setSelected(item)}
+                      onClick={() => section.setSelected(null)}
                     >
-                      {item}
+                      All ({section.items.length} {section.title})
                     </li>
-                  ))}
-                </ul>
+                    {section.items.map((item) => (
+                      <li
+                        key={item}
+                        className={`cursor-pointer px-4 py-2 hover:bg-blue-200/70 ${
+                          section.selected === item ? "bg-blue-200/70" : ""
+                        }`}
+                        onClick={() => section.setSelected(item)}
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ))}
           </div>
 
           {/* Track list */}
-          <div className="flex-1 overflow-auto brushed-metal">
-            <table className="w-full text-sm table-fixed border-collapse">
-              <thead className="bg-[#d0d0d0] text-left border-b border-[#aaa]">
-                <tr>
-                  <th className="px-4 py-2 cursor-pointer" onClick={toggleSort}>
-                    Title {filterState.sortAsc ? "↑" : "↓"}
-                  </th>
-                  <th className="px-4 py-2">Artist</th>
-                  <th className="px-4 py-2">Album</th>
-                  <th className="px-4 py-2 text-right">Time</th>
-                  <th className="px-4 py-2 text-right">Genre</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getFilteredTracks().map((track, i) => (
-                  <tr
-                    key={track.id}
-                    className={`${
-                      i % 2 === 0 ? "bg-white/40" : "bg-white/20"
-                    } hover:bg-blue-200/70 cursor-pointer`}
-                    onDoubleClick={() => handleTrackClick(track)}
-                    onContextMenu={(e) => handleContextMenu(e, track)}
-                  >
-                    <td className="px-4 py-2">{track.title}</td>
-                    <td className="px-4 py-2">{track.artist}</td>
-                    <td className="px-4 py-2">{track.album}</td>
-                    <td className="px-4 py-2 text-right">{track.duration}</td>
-                    <td className="px-4 py-2 text-right">{track.genre}</td>
+          <div className="flex-1 flex flex-col brushed-metal h-full">
+            <div className="sticky top-0 z-10 bg-[#d0d0d0] text-left border-b border-[#aaa]">
+              <table className="w-full text-sm table-fixed border-collapse">
+                <thead>
+                  <tr>
+                    <th
+                      className="px-4 py-2 cursor-pointer"
+                      onClick={toggleSort}
+                    >
+                      Title {filterState.sortAsc ? "↑" : "↓"}
+                    </th>
+                    <th className="px-4 py-2">Artist</th>
+                    <th className="px-4 py-2">Album</th>
+                    <th className="px-4 py-2 text-right">Time</th>
+                    <th className="px-4 py-2 text-right">Genre</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+              </table>
+            </div>
+            <div className="flex-1 overflow-y-auto h-0">
+              <table className="w-full text-sm table-fixed border-collapse">
+                <tbody>
+                  {getFilteredTracks().map((track, i) => (
+                    <tr
+                      key={track.id}
+                      className={`${
+                        i % 2 === 0 ? "bg-white/40" : "bg-white/20"
+                      } hover:bg-blue-200/70 cursor-pointer`}
+                      onDoubleClick={() => handleTrackClick(track)}
+                      onContextMenu={(e) => handleContextMenu(e, track)}
+                    >
+                      <td className="px-4 py-2">{track.title}</td>
+                      <td className="px-4 py-2">{track.artist}</td>
+                      <td className="px-4 py-2">{track.album}</td>
+                      <td className="px-4 py-2 text-right">{track.duration}</td>
+                      <td className="px-4 py-2 text-right">{track.genre}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
