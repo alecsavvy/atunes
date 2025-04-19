@@ -17,6 +17,7 @@ export type Track = {
   index: number;
   title: string;
   artist: string;
+  artistId: string;
   album: string;
   duration: string;
   genre: string;

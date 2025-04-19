@@ -1,9 +1,6 @@
 import { AudiusSdk, Favorite, Track } from "@audius/sdk";
 import { useStore } from "./store";
-import {
-  PlaylistFullWithoutTracks,
-  TrackFull,
-} from "@audius/sdk/dist/sdk/api/generated/full";
+
 const audiusSdkApiKey = "832c79b4c0a3da1affae305269a9eb8305858158";
 export const NO_ALBUM = "<no album>";
 
@@ -16,6 +13,7 @@ const convertAudiusTrack = (track: Track, index: number, source: string) => ({
   index: index + 1,
   title: track.title,
   artist: track.user.name,
+  artistId: track.user.id,
   album: track.albumBacklink?.playlistName || NO_ALBUM,
   duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
     .toString()
@@ -100,18 +98,14 @@ export const fetchUploads = async (userId: string) => {
   useStore.getState().setTracks("uploads", convertedTracks);
 };
 
-export const fetchPlaylists = async (
-  userId: string
-): Promise<PlaylistFullWithoutTracks[]> => {
+export const fetchPlaylists = async (userId: string) => {
   const { data: playlists } = await audiusSdk.full.users.getPlaylistsByUser({
     id: userId,
   });
   return playlists ?? [];
 };
 
-export const fetchPlaylistsTracks = async (
-  playlistId: string
-): Promise<TrackFull[]> => {
+export const fetchPlaylistsTracks = async (playlistId: string) => {
   const { data: playlists } = await audiusSdk.full.playlists.getPlaylistTracks({
     playlistId: playlistId,
   });
@@ -171,4 +165,29 @@ export const getStreamUrl = async (trackId: string): Promise<string> => {
     console.error("Failed to get stream URL:", error);
     throw error;
   }
+};
+
+export const getAlbumTracks = async (albumId: string) => {
+  const { data: tracks } = await audiusSdk.full.playlists.getPlaylistTracks({
+    playlistId: albumId,
+  });
+  return tracks ?? [];
+};
+
+export const getArtistTracks = async (userId: string) => {
+  const { data: tracks } = await audiusSdk.full.users.getTracksByUser({
+    id: userId,
+  });
+  return tracks ?? [];
+};
+
+export const getGenreTracks = async (genre: string) => {
+  const { data: searchResult } = await audiusSdk.full.search.search({
+    query: genre,
+    kind: "tracks",
+    limit: 100,
+  });
+
+  const tracks = searchResult?.tracks ?? [];
+  return tracks;
 };

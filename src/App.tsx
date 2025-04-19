@@ -11,15 +11,23 @@ import {
   fetchPlaylistsTracks,
   convertAudiusTrack,
   audiusSdk,
+  getAlbumTracks,
+  getArtistTracks,
+  getGenreTracks,
+  NO_ALBUM,
 } from "./sdk";
-import { PlaylistFullWithoutTracks } from "@audius/sdk/dist/sdk/api/generated/full";
+import {
+  PlaylistFullWithoutTracks,
+  TrackFull,
+  SearchTrackFull,
+} from "@audius/sdk/dist/sdk/api/generated/full";
 import Login from "./Login";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { QueueView } from "./components/QueueView";
-import { NO_ALBUM } from "./sdk";
+
 interface ContextMenuProps {
   track: Track;
   position: { x: number; y: number };
@@ -41,16 +49,71 @@ const ContextMenu = ({
     setCurrentTrack,
     setPlaybackState,
     addToQueue,
+    setSelectedSource,
   } = useStore();
   const [, setIsHovered] = useState(false);
 
-  const handleViewArtist = () => {
-    setSelectedArtist(track.artist);
+  const handleViewArtist = async () => {
+    const sourceId = `artist-${track.artist}`;
+    setSelectedSource(sourceId);
+    const tracks = await getArtistTracks(track.artistId);
+    const convertedTracks = tracks.map((t: TrackFull, index: number) =>
+      convertAudiusTrack(t, index, sourceId)
+    );
+    useStore.getState().setTracks(sourceId, convertedTracks);
+
+    // Add to recents
+    const store = useStore.getState();
+    const updatedSources = store.sources.map((source) => {
+      if (source.id === "recents") {
+        return {
+          ...source,
+          children: [
+            {
+              id: sourceId,
+              label: `Artist: ${track.artist}`,
+              type: "dynamic" as const,
+              icon: track.artwork ? track.artwork._150x150 : "🎵",
+            },
+            ...(source.children || []),
+          ],
+        };
+      }
+      return source;
+    });
+    store.setSources(updatedSources);
     onClose();
   };
 
-  const handleViewGenre = () => {
-    setSelectedGenre(track.genre);
+  const handleViewGenre = async () => {
+    const sourceId = `genre-${track.genre}`;
+    setSelectedSource(sourceId);
+    const tracks = await getGenreTracks(track.genre);
+    const convertedTracks = tracks.map((t: SearchTrackFull, index: number) =>
+      convertAudiusTrack(t, index, sourceId)
+    );
+    useStore.getState().setTracks(sourceId, convertedTracks);
+
+    // Add to recents
+    const store = useStore.getState();
+    const updatedSources = store.sources.map((source) => {
+      if (source.id === "recents") {
+        return {
+          ...source,
+          children: [
+            {
+              id: sourceId,
+              label: `Genre: ${track.genre}`,
+              type: "dynamic" as const,
+              icon: track.artwork ? track.artwork._150x150 : "🎵",
+            },
+            ...(source.children || []),
+          ],
+        };
+      }
+      return source;
+    });
+    store.setSources(updatedSources);
     onClose();
   };
 
@@ -67,8 +130,36 @@ const ContextMenu = ({
     onClose();
   };
 
-  const handleViewAlbum = () => {
-    // setSelectedAlbum(track.album);
+  const handleViewAlbum = async () => {
+    if (track.album === NO_ALBUM) return;
+    const sourceId = `album-${track.album}`;
+    setSelectedSource(sourceId);
+    const tracks = await getAlbumTracks(track.album);
+    const convertedTracks = tracks.map((t: TrackFull, index: number) =>
+      convertAudiusTrack(t, index, sourceId)
+    );
+    useStore.getState().setTracks(sourceId, convertedTracks);
+
+    // Add to recents
+    const store = useStore.getState();
+    const updatedSources = store.sources.map((source) => {
+      if (source.id === "recents") {
+        return {
+          ...source,
+          children: [
+            {
+              id: sourceId,
+              label: `Album: ${track.album}`,
+              type: "dynamic" as const,
+              icon: track.artwork ? track.artwork._150x150 : "🎵",
+            },
+            ...(source.children || []),
+          ],
+        };
+      }
+      return source;
+    });
+    store.setSources(updatedSources);
     onClose();
   };
 
