@@ -101,7 +101,7 @@ export const useStore = create<StoreState>((set, get) => ({
   currentTime: 0,
   duration: 0,
   filterState: {
-    selectedSource: "library",
+    selectedSource: "trending",
     selectedGenre: null,
     selectedArtist: null,
     selectedAlbum: null,
