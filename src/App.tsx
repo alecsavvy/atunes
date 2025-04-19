@@ -1153,7 +1153,7 @@ export default function App() {
                     <thead>
                       <tr>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("title")}
                         >
                           Title{" "}
@@ -1165,7 +1165,7 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("artist")}
                         >
                           Artist{" "}
@@ -1177,7 +1177,7 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("album")}
                         >
                           Album{" "}
@@ -1189,7 +1189,7 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("genre")}
                         >
                           Genre{" "}
@@ -1201,7 +1201,7 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("releaseDate")}
                         >
                           Release Date{" "}
@@ -1213,7 +1213,7 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("duration")}
                         >
                           Duration{" "}
@@ -1225,7 +1225,7 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/30 dark:hover:bg-zinc-700/90 transition-colors"
+                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
                           onClick={() => toggleSort("playCount")}
                         >
                           Plays{" "}
