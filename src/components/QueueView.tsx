@@ -8,6 +8,7 @@ export const QueueView: React.FC = () => {
     currentQueueIndex,
     playbackState,
     removeFromQueue,
+    skipToTrack,
   } = useStore();
 
   return (
@@ -56,16 +57,16 @@ export const QueueView: React.FC = () => {
                 <th className="w-16 px-2 py-2 text-left text-xs font-medium text-zinc-600">
                   Artwork
                 </th>
-                <th className="w-1/4 px-2 py-2 text-left text-xs font-medium text-zinc-600">
+                <th className="w-[200px] px-2 py-2 text-left text-xs font-medium text-zinc-600">
                   Title
                 </th>
-                <th className="w-1/4 px-2 py-2 text-left text-xs font-medium text-zinc-600">
+                <th className="w-[150px] px-2 py-2 text-left text-xs font-medium text-zinc-600">
                   Artist
                 </th>
-                <th className="w-1/4 px-2 py-2 text-left text-xs font-medium text-zinc-600">
+                <th className="w-[150px] px-2 py-2 text-left text-xs font-medium text-zinc-600">
                   Album
                 </th>
-                <th className="w-1/6 px-2 py-2 text-left text-xs font-medium text-zinc-600">
+                <th className="w-[100px] px-2 py-2 text-left text-xs font-medium text-zinc-600">
                   Genre
                 </th>
                 <th className="w-16 px-2 py-2 text-left text-xs font-medium text-zinc-600">
@@ -92,26 +93,34 @@ export const QueueView: React.FC = () => {
                       className="w-12 h-12 rounded object-cover"
                     />
                   </td>
-                  <td className="px-2 py-2 text-zinc-800 truncate">
+                  <td className="px-2 py-2 text-zinc-800 truncate max-w-[200px]">
                     {track.title}
                   </td>
-                  <td className="px-2 py-2 text-zinc-600 truncate">
+                  <td className="px-2 py-2 text-zinc-600 truncate max-w-[150px]">
                     {track.artist}
                   </td>
-                  <td className="px-2 py-2 text-zinc-600 truncate">
+                  <td className="px-2 py-2 text-zinc-600 truncate max-w-[150px]">
                     {track.album}
                   </td>
-                  <td className="px-2 py-2 text-zinc-600 truncate">
+                  <td className="px-2 py-2 text-zinc-600 truncate max-w-[100px]">
                     {track.genre}
                   </td>
                   <td className="px-2 py-2 text-zinc-600">{track.duration}</td>
                   <td className="px-2 py-2">
-                    <button
-                      onClick={() => removeFromQueue(index)}
-                      className="text-zinc-600 hover:text-zinc-800 cursor-pointer"
-                    >
-                      Remove
-                    </button>
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => skipToTrack(index)}
+                        className="w-full px-2 py-1 text-xs text-zinc-800 bg-zinc-100 hover:bg-zinc-200 border border-[#E6C7FF] hover:border-[#C273FF] rounded cursor-pointer transition-colors"
+                      >
+                        Skip To
+                      </button>
+                      <button
+                        onClick={() => removeFromQueue(index)}
+                        className="w-full px-2 py-1 text-xs text-zinc-800 bg-zinc-100 hover:bg-zinc-200 border border-red-300 hover:border-red-400 rounded cursor-pointer transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

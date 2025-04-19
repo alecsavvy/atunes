@@ -75,6 +75,8 @@ type StoreState = {
   duration: number;
   volume: number;
   showQueue: boolean;
+  loop: boolean;
+  shuffle: boolean;
   [key: string]:
     | Track[]
     | FilterState
@@ -115,7 +117,10 @@ type StoreState = {
   removeFromQueue: (index: number) => void;
   clearQueue: () => void;
   nextTrack: () => void;
+  skipToTrack: (index: number) => void;
   previousTrack: () => void;
+  toggleLoop: () => void;
+  toggleShuffle: () => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -136,6 +141,8 @@ export const useStore = create<StoreState>((set, get) => ({
   duration: 0,
   volume: 1.0,
   showQueue: false,
+  loop: true,
+  shuffle: false,
   filterState: {
     selectedSource: "trending",
     selectedGenre: null,
@@ -206,6 +213,8 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => ({
       filterState: { ...state.filterState, selectedSource: source },
       showQueue: false,
+      queue: [],
+      currentQueueIndex: -1,
     })),
   setSelectedGenre: (genre) =>
     set((state) => ({
@@ -490,7 +499,15 @@ export const useStore = create<StoreState>((set, get) => ({
   setDuration: (duration) => set({ duration }),
   setVolume: (volume) => set({ volume }),
   toggleQueue: () => set((state) => ({ showQueue: !state.showQueue })),
-  addToQueue: (track) => set((state) => ({ queue: [...state.queue, track] })),
+  addToQueue: (track) =>
+    set((state) => {
+      // Check if the track is already in the queue
+      const isAlreadyInQueue = state.queue.some((t) => t.id === track.id);
+      if (isAlreadyInQueue) {
+        return state;
+      }
+      return { queue: [...state.queue, track] };
+    }),
   removeFromQueue: (index) =>
     set((state) => ({
       queue: state.queue.filter((_, i) => i !== index),
@@ -517,6 +534,17 @@ export const useStore = create<StoreState>((set, get) => ({
       });
     }
   },
+  skipToTrack: (index: number) => {
+    const state = get();
+    if (index >= 0 && index < state.queue.length) {
+      // Keep only the tracks from the skipped track onwards
+      const newQueue = state.queue.slice(index);
+      set({
+        queue: newQueue,
+        currentQueueIndex: 0, // The skipped track is now at index 0
+      });
+    }
+  },
   previousTrack: () => {
     const state = get();
     if (state.currentQueueIndex > 0) {
@@ -528,4 +556,6 @@ export const useStore = create<StoreState>((set, get) => ({
       });
     }
   },
+  toggleLoop: () => set((state) => ({ loop: !state.loop })),
+  toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
 }));

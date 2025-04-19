@@ -196,7 +196,12 @@ export default function App() {
     toggleQueue,
     addToQueue,
     removeFromQueue,
+    clearQueue,
     queue,
+    toggleLoop,
+    toggleShuffle,
+    loop,
+    shuffle,
   } = useStore();
 
   const [localVolume, setLocalVolume] = useState(0.7);
@@ -224,8 +229,25 @@ export default function App() {
   };
 
   const handleTrackClick = (track: Track) => {
+    // Only clear queue if we're starting a new playback sequence
+    if (playbackState === PlaybackState.NO_SONG_SELECTED) {
+      clearQueue();
+    }
+
+    // Get all tracks from the current source
+    const allTracks = getFilteredTracks();
+
+    // Find the index of the clicked track
+    const trackIndex = allTracks.findIndex((t) => t.id === track.id);
+
+    // Add all tracks from the clicked track onwards to the queue
+    for (let i = trackIndex + 1; i < allTracks.length; i++) {
+      addToQueue(allTracks[i]);
+    }
+
+    // Set the clicked track as current and start playing
     setCurrentTrack(track);
-    setAudioSource(null); // Reset audio source to trigger new URL fetch
+    setAudioSource(null);
     setCurrentTime(0);
     setPlaybackState(PlaybackState.SONG_PLAYING);
   };
@@ -246,7 +268,19 @@ export default function App() {
   };
 
   const togglePlayback = () => {
-    if (playbackState === PlaybackState.NO_SONG_SELECTED) return;
+    if (playbackState === PlaybackState.NO_SONG_SELECTED && queue.length === 0)
+      return;
+
+    if (playbackState === PlaybackState.NO_SONG_SELECTED && queue.length > 0) {
+      // Start playing the first track in the queue
+      const nextTrack = queue[0];
+      setCurrentTrack(nextTrack);
+      setAudioSource(null); // Reset audio source to trigger new URL fetch
+      setCurrentTime(0);
+      setPlaybackState(PlaybackState.SONG_PLAYING);
+      removeFromQueue(0); // Remove the track that just started playing
+      return;
+    }
 
     if (playbackState === PlaybackState.SONG_PLAYING) {
       if (audioPlayerRef.current) {
@@ -347,14 +381,29 @@ export default function App() {
           setPlaybackState(PlaybackState.SONG_PAUSED);
         }}
         onEnded={() => {
-          const nextTrack = queue[0];
-          if (nextTrack) {
-            setCurrentTrack(nextTrack);
-            setAudioSource(null); // Reset audio source to trigger new URL fetch
+          const { loop, queue } = useStore.getState();
+
+          if (queue[0]) {
+            // If we have a next track in queue, play it
+            if (loop && currentTrack) {
+              // If loop is enabled, add current track back to queue
+              addToQueue(currentTrack);
+            }
+            setCurrentTrack(queue[0]);
+            setAudioSource(null);
             setCurrentTime(0);
             setPlaybackState(PlaybackState.SONG_PLAYING);
-            removeFromQueue(0); // Remove the track that just started playing
+            removeFromQueue(0);
+          } else if (loop && currentTrack) {
+            // If no next track but loop is enabled, add current track back and play it
+            addToQueue(currentTrack);
+            setCurrentTrack(currentTrack);
+            setAudioSource(null);
+            setCurrentTime(0);
+            setPlaybackState(PlaybackState.SONG_PLAYING);
+            removeFromQueue(0);
           } else {
+            // No more tracks and loop is disabled
             setCurrentTrack(null);
             setPlaybackState(PlaybackState.NO_SONG_SELECTED);
             setCurrentTime(0);
@@ -389,7 +438,8 @@ export default function App() {
                   stroke="currentColor"
                   strokeWidth="1"
                   className={
-                    playbackState === PlaybackState.NO_SONG_SELECTED
+                    playbackState === PlaybackState.NO_SONG_SELECTED &&
+                    queue.length === 0
                       ? "text-zinc-400"
                       : "text-zinc-800"
                   }
@@ -424,7 +474,8 @@ export default function App() {
                     stroke="currentColor"
                     strokeWidth="1"
                     className={
-                      playbackState === PlaybackState.NO_SONG_SELECTED
+                      playbackState === PlaybackState.NO_SONG_SELECTED &&
+                      queue.length === 0
                         ? "text-zinc-400"
                         : "text-zinc-800"
                     }
@@ -442,7 +493,8 @@ export default function App() {
                   stroke="currentColor"
                   strokeWidth="1"
                   className={
-                    playbackState === PlaybackState.NO_SONG_SELECTED
+                    playbackState === PlaybackState.NO_SONG_SELECTED &&
+                    queue.length === 0
                       ? "text-zinc-400"
                       : "text-zinc-800"
                   }
@@ -805,25 +857,108 @@ export default function App() {
 
       {/* Footer */}
       <div className="relative h-12 border-t border-[#999] flex items-center justify-center text-xs text-zinc-600 brushed-metal">
-        <div className="absolute left-4 flex gap-2">
-          <button className="aqua-button px-2 text-xs">🔁 Loop</button>
-          <button className="aqua-button px-2 text-xs">🔀 Shuffle</button>
+        <div className="absolute left-4 flex items-center gap-2">
           <button
-            className={`aqua-button px-2 text-xs ${
+            onClick={toggleLoop}
+            className={`w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8] ${
+              loop ? "bg-[#E6C7FF] dark:bg-[#4a1a7a]" : ""
+            }`}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              className={`${loop ? "text-zinc-800" : "text-zinc-400"}`}
+            >
+              <path
+                d="M17 17H7V14L3 18L7 22V19H19V13H17V17Z"
+                fill="currentColor"
+              />
+              <path d="M7 7H17V10L21 6L17 2V5H5V11H7V7Z" fill="currentColor" />
+            </svg>
+          </button>
+          <button
+            onClick={toggleShuffle}
+            className={`w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8] ${
+              shuffle ? "bg-[#E6C7FF] dark:bg-[#4a1a7a]" : ""
+            }`}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              className={`${shuffle ? "text-zinc-800" : "text-zinc-400"}`}
+            >
+              <path
+                d="M18 4L22 8L18 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M6 20L2 16L6 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M2 8H22"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M2 16H22"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={toggleQueue}
+            className={`w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8] ${
               showQueue ? "bg-[#E6C7FF] dark:bg-[#4a1a7a]" : ""
             }`}
-            onClick={toggleQueue}
           >
-            ▶️ Queue
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              className="text-zinc-800"
+            >
+              <path
+                d="M4 6H20M4 12H20M4 18H20"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         </div>
-        {getUserState() && `${getUserState()?.handle} - `}
-        {getFilteredTracks().length} songs,{" "}
-        {getFilteredTracks().reduce((acc, track) => {
-          const [minutes, seconds] = track.duration.split(":").map(Number);
-          return acc + minutes * 60 + seconds;
-        }, 0)}{" "}
-        seconds total
+        <div className="absolute left-[50%] -translate-x-[50%]">
+          {getUserState() && `${getUserState()?.handle} - `}
+          {getFilteredTracks().length} songs,{" "}
+          {getFilteredTracks().reduce((acc, track) => {
+            const [minutes, seconds] = track.duration.split(":").map(Number);
+            return acc + minutes * 60 + seconds;
+          }, 0)}{" "}
+          seconds total
+        </div>
         <button
           onClick={toggleTheme}
           className="absolute right-4 bottom-2 text-xs px-3 py-1 rounded-full aqua-button"
