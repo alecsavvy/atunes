@@ -145,282 +145,62 @@ type StoreState = {
     | ((index: number) => void);
 };
 
-export const useStore = create<StoreState>((set, get) => ({
-  library: [],
-  trending: [],
-  underground: [],
-  favorites: [],
-  playlists: [],
-  uploads: [],
-  searches: [],
-  playedTracks: [],
-  feelingLucky: [],
-  currentTrack: null,
-  queue: [],
-  currentQueueIndex: -1,
-  playbackState: PlaybackState.NO_SONG_SELECTED,
-  currentTime: 0,
-  duration: 0,
-  volume: 1.0,
-  showQueue: false,
-  loop: true,
-  shuffle: false,
-  isDark: document.documentElement.classList.contains("dark"),
-  filterState: {
-    selectedSource: "trending",
-    selectedGenre: null,
-    selectedArtist: null,
-    selectedAlbum: null,
-    sortAsc: true,
-  },
-  userState: null,
-  sources: [
-    {
-      id: "discover" as const,
-      label: "🔍 Discover",
-      type: "static" as const,
-      children: [
-        {
-          id: "trending" as const,
-          label: "🔥 Trending",
-          type: "static" as const,
-        },
-        {
-          id: "underground" as const,
-          label: "🔊 Underground",
-          type: "static" as const,
-        },
-        {
-          id: "feelingLucky" as const,
-          label: "🎲 Feeling Lucky",
-          type: "static" as const,
-        },
-      ],
-    },
-    {
-      id: "library" as const,
-      label: "📚 Library",
-      type: "static" as const,
-      children: [
-        {
-          id: "favorites" as const,
-          label: "💖 Favorites",
-          type: "static" as const,
-        },
-        {
-          id: "uploads" as const,
-          label: "💿 Uploads",
-          type: "static" as const,
-        },
-      ],
-    },
-    {
-      id: "recents" as const,
-      label: "⏱️ Recents",
-      type: "static" as const,
-      children: [
-        {
-          id: "searches" as const,
-          label: "🔎 Searches",
-          type: "static" as const,
-        },
-        {
-          id: "played-tracks" as const,
-          label: "🎵 Played Tracks",
-          type: "static" as const,
-        },
-      ],
-    },
-  ],
-  setSelectedSource: (source) =>
-    set((state) => ({
-      filterState: { ...state.filterState, selectedSource: source },
-      showQueue: false,
-      queue: [],
-      currentQueueIndex: -1,
-    })),
-  setSelectedGenre: (genre) =>
-    set((state) => ({
-      filterState: { ...state.filterState, selectedGenre: genre },
-    })),
-  setSelectedArtist: (artist) =>
-    set((state) => ({
-      filterState: { ...state.filterState, selectedArtist: artist },
-    })),
-  setSelectedAlbum: (album) =>
-    set((state) => ({
-      filterState: { ...state.filterState, selectedAlbum: album },
-    })),
-  toggleSort: () =>
-    set((state) => ({
-      filterState: {
-        ...state.filterState,
-        sortAsc: !state.filterState.sortAsc,
-      },
-    })),
-  getFilteredTracks: () => {
-    const { filterState } = get();
-    const sourceMap: Record<string, string> = {
-      "played-tracks": "playedTracks",
-      searches: "searches",
-      feelingLucky: "feelingLucky",
-    };
-    const sourceKey =
-      sourceMap[filterState.selectedSource] || filterState.selectedSource;
+export const useStore = create<StoreState>((set, get) => {
+  // Check system preference
+  const systemPrefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
 
-    let sourceTracks: Track[] = [];
+  // Set initial state
+  if (systemPrefersDark) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
 
-    // Handle aggregation for discover and library sources
-    if (filterState.selectedSource === "discover") {
-      sourceTracks = [
-        ...(get().trending || []),
-        ...(get().underground || []),
-        ...(get().feelingLucky || []),
-      ];
-    } else if (filterState.selectedSource === "library") {
-      sourceTracks = [
-        ...(get().favorites || []),
-        ...(get().uploads || []),
-        ...(get().playlists || []),
-      ];
-    } else {
-      sourceTracks = (get()[sourceKey] || []) as Track[];
-    }
-
-    let filtered = sourceTracks;
-
-    if (filterState.selectedGenre) {
-      filtered = filtered.filter(
-        (track) => track.genre === filterState.selectedGenre
-      );
-    }
-    if (filterState.selectedArtist) {
-      filtered = filtered.filter(
-        (track) => track.artist === filterState.selectedArtist
-      );
-    }
-    if (filterState.selectedAlbum) {
-      filtered = filtered.filter(
-        (track) => track.album === filterState.selectedAlbum
-      );
-    }
-
-    // For played tracks, maintain the order of most recent first
-    if (filterState.selectedSource === "played-tracks") {
-      return filtered;
-    }
-
-    // For other sources, apply the normal sorting
-    return filtered.sort((a, b) => {
-      const comparison = a.title.localeCompare(b.title);
-      return filterState.sortAsc ? comparison : -comparison;
+  // Listen for system preference changes
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", (e) => {
+      if (e.matches) {
+        document.documentElement.classList.add("dark");
+        set({ isDark: true });
+      } else {
+        document.documentElement.classList.remove("dark");
+        set({ isDark: false });
+      }
     });
-  },
-  getUniqueGenres: () => {
-    const { filterState } = get();
-    const sourceMap: Record<string, string> = {
-      "played-tracks": "playedTracks",
-      searches: "searches",
-      feelingLucky: "feelingLucky",
-    };
-    const sourceKey =
-      sourceMap[filterState.selectedSource] || filterState.selectedSource;
 
-    let sourceTracks: Track[] = [];
-
-    if (filterState.selectedSource === "discover") {
-      sourceTracks = [
-        ...(get().trending || []),
-        ...(get().underground || []),
-        ...(get().feelingLucky || []),
-      ];
-    } else if (filterState.selectedSource === "library") {
-      sourceTracks = [
-        ...(get().favorites || []),
-        ...(get().uploads || []),
-        ...(get().playlists || []),
-      ];
-    } else {
-      sourceTracks = (get()[sourceKey] || []) as Track[];
-    }
-
-    return [...new Set(sourceTracks.map((track) => track.genre))];
-  },
-  getUniqueArtists: () => {
-    const { filterState } = get();
-    const sourceMap: Record<string, string> = {
-      "played-tracks": "playedTracks",
-      searches: "searches",
-      feelingLucky: "feelingLucky",
-    };
-    const sourceKey =
-      sourceMap[filterState.selectedSource] || filterState.selectedSource;
-
-    let sourceTracks: Track[] = [];
-
-    if (filterState.selectedSource === "discover") {
-      sourceTracks = [
-        ...(get().trending || []),
-        ...(get().underground || []),
-        ...(get().feelingLucky || []),
-      ];
-    } else if (filterState.selectedSource === "library") {
-      sourceTracks = [
-        ...(get().favorites || []),
-        ...(get().uploads || []),
-        ...(get().playlists || []),
-      ];
-    } else {
-      sourceTracks = (get()[sourceKey] || []) as Track[];
-    }
-
-    return [...new Set(sourceTracks.map((track) => track.artist))];
-  },
-  getUniqueAlbums: () => {
-    const { filterState } = get();
-    const sourceMap: Record<string, string> = {
-      "played-tracks": "playedTracks",
-      searches: "searches",
-      feelingLucky: "feelingLucky",
-    };
-    const sourceKey =
-      sourceMap[filterState.selectedSource] || filterState.selectedSource;
-
-    let sourceTracks: Track[] = [];
-
-    if (filterState.selectedSource === "discover") {
-      sourceTracks = [
-        ...(get().trending || []),
-        ...(get().underground || []),
-        ...(get().feelingLucky || []),
-      ];
-    } else if (filterState.selectedSource === "library") {
-      sourceTracks = [
-        ...(get().favorites || []),
-        ...(get().uploads || []),
-        ...(get().playlists || []),
-      ];
-    } else {
-      sourceTracks = (get()[sourceKey] || []) as Track[];
-    }
-
-    return [...new Set(sourceTracks.map((track) => track.album))];
-  },
-  setTracks: (source, tracks) => set(() => ({ [source]: tracks })),
-  setUserState: (userState: DecodedUserToken) => {
-    set({ userState });
-    // Pre-fetch favorites when user logs in
-    if (userState) {
-      fetchFavoritesTracks(userState.userId);
-      fetchPlaylistsByUser(userState.userId);
-      fetchUploads(userState.userId);
-    }
-    get().updateSources(userState);
-  },
-  getUserState: () => get().userState,
-  setSources: (sources) => set({ sources }),
-  updateSources: (userState) => {
-    const baseSources = [
+  return {
+    library: [],
+    trending: [],
+    underground: [],
+    favorites: [],
+    playlists: [],
+    uploads: [],
+    searches: [],
+    playedTracks: [],
+    feelingLucky: [],
+    currentTrack: null,
+    queue: [],
+    currentQueueIndex: -1,
+    playbackState: PlaybackState.NO_SONG_SELECTED,
+    currentTime: 0,
+    duration: 0,
+    volume: 1.0,
+    showQueue: false,
+    loop: true,
+    shuffle: false,
+    isDark: systemPrefersDark,
+    filterState: {
+      selectedSource: "trending",
+      selectedGenre: null,
+      selectedArtist: null,
+      selectedAlbum: null,
+      sortAsc: true,
+    },
+    userState: null,
+    sources: [
       {
         id: "discover" as const,
         label: "🔍 Discover",
@@ -447,20 +227,18 @@ export const useStore = create<StoreState>((set, get) => ({
         id: "library" as const,
         label: "📚 Library",
         type: "static" as const,
-        children: userState
-          ? [
-              {
-                id: "favorites" as const,
-                label: "💖 Favorites",
-                type: "static" as const,
-              },
-              {
-                id: "uploads" as const,
-                label: "💿 Uploads",
-                type: "static" as const,
-              },
-            ]
-          : [],
+        children: [
+          {
+            id: "favorites" as const,
+            label: "💖 Favorites",
+            type: "static" as const,
+          },
+          {
+            id: "uploads" as const,
+            label: "💿 Uploads",
+            type: "static" as const,
+          },
+        ],
       },
       {
         id: "recents" as const,
@@ -479,151 +257,410 @@ export const useStore = create<StoreState>((set, get) => ({
           },
         ],
       },
-    ] as const;
-
-    set({ sources: baseSources });
-  },
-  addDynamicSource: (source) =>
-    set((state) => ({
-      sources: [...state.sources, source],
-    })),
-  removeDynamicSource: (sourceId) =>
-    set((state) => ({
-      sources: state.sources.filter((source) => source.id !== sourceId),
-    })),
-  setCurrentTrack: (track) => {
-    if (track) {
-      set((state) => {
-        // Find the index of the track in the queue
-        const trackIndex = state.queue.findIndex((t) => t.id === track.id);
-        return {
-          currentTrack: track,
-          currentQueueIndex: trackIndex,
-          playbackState: PlaybackState.SONG_PAUSED,
-          playedTracks: [
-            track,
-            ...state.playedTracks.filter((t) => t.id !== track.id),
-          ].slice(0, 100),
-          feelingLucky: [...state.trending, ...state.underground]
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 50),
-        };
-      });
-    } else {
-      set({
-        currentTrack: null,
+    ],
+    setSelectedSource: (source) =>
+      set((state) => ({
+        filterState: { ...state.filterState, selectedSource: source },
+        showQueue: false,
+        queue: [],
         currentQueueIndex: -1,
-        playbackState: PlaybackState.NO_SONG_SELECTED,
-      });
-    }
-  },
-  setPlaybackState: (state) => set({ playbackState: state }),
-  setCurrentTime: (currentTime) =>
-    set((state) => ({
-      currentTime:
-        typeof currentTime === "function"
-          ? currentTime(state.currentTime)
-          : currentTime,
-    })),
-  setDuration: (duration) => set({ duration }),
-  setVolume: (volume) => set({ volume }),
-  toggleQueue: () => set((state) => ({ showQueue: !state.showQueue })),
-  addToQueue: (track) =>
-    set((state) => {
-      // Check if the track is already in the queue
-      const isAlreadyInQueue = state.queue.some((t) => t.id === track.id);
-      if (isAlreadyInQueue) {
-        return state;
+      })),
+    setSelectedGenre: (genre) =>
+      set((state) => ({
+        filterState: { ...state.filterState, selectedGenre: genre },
+      })),
+    setSelectedArtist: (artist) =>
+      set((state) => ({
+        filterState: { ...state.filterState, selectedArtist: artist },
+      })),
+    setSelectedAlbum: (album) =>
+      set((state) => ({
+        filterState: { ...state.filterState, selectedAlbum: album },
+      })),
+    toggleSort: () =>
+      set((state) => ({
+        filterState: {
+          ...state.filterState,
+          sortAsc: !state.filterState.sortAsc,
+        },
+      })),
+    getFilteredTracks: () => {
+      const { filterState } = get();
+      const sourceMap: Record<string, string> = {
+        "played-tracks": "playedTracks",
+        searches: "searches",
+        feelingLucky: "feelingLucky",
+      };
+      const sourceKey =
+        sourceMap[filterState.selectedSource] || filterState.selectedSource;
+
+      let sourceTracks: Track[] = [];
+
+      // Handle aggregation for discover and library sources
+      if (filterState.selectedSource === "discover") {
+        sourceTracks = [
+          ...(get().trending || []),
+          ...(get().underground || []),
+          ...(get().feelingLucky || []),
+        ];
+      } else if (filterState.selectedSource === "library") {
+        sourceTracks = [
+          ...(get().favorites || []),
+          ...(get().uploads || []),
+          ...(get().playlists || []),
+        ];
+      } else {
+        sourceTracks = (get()[sourceKey] || []) as Track[];
       }
-      return { queue: [...state.queue, track] };
-    }),
-  removeFromQueue: (index) =>
-    set((state) => ({
-      queue: state.queue.filter((_, i) => i !== index),
-      currentQueueIndex:
-        state.currentQueueIndex > index
-          ? state.currentQueueIndex - 1
-          : state.currentQueueIndex,
-    })),
-  clearQueue: () => set({ queue: [], currentQueueIndex: -1 }),
-  nextTrack: () => {
-    const state = get();
-    if (state.currentQueueIndex < state.queue.length - 1) {
-      const nextTrack = state.queue[state.currentQueueIndex + 1];
-      set({
-        currentTrack: nextTrack,
-        currentQueueIndex: state.currentQueueIndex + 1,
-        playbackState: PlaybackState.SONG_PLAYING,
-      });
-    } else {
-      set({
-        currentTrack: null,
-        currentQueueIndex: -1,
-        playbackState: PlaybackState.NO_SONG_SELECTED,
-      });
-    }
-  },
-  skipToTrack: (index: number) => {
-    const state = get();
-    if (index >= 0 && index < state.queue.length) {
-      // Keep only the tracks from the skipped track onwards
-      const newQueue = state.queue.slice(index);
-      set({
-        queue: newQueue,
-        currentQueueIndex: 0, // The skipped track is now at index 0
-      });
-    }
-  },
-  previousTrack: () => {
-    const state = get();
-    if (state.currentQueueIndex > 0) {
-      const prevTrack = state.queue[state.currentQueueIndex - 1];
-      set({
-        currentTrack: prevTrack,
-        currentQueueIndex: state.currentQueueIndex - 1,
-        playbackState: PlaybackState.SONG_PLAYING,
-      });
-    }
-  },
-  toggleLoop: () => set((state) => ({ loop: !state.loop })),
-  toggleShuffle: () =>
-    set((state) => {
-      const newShuffleState = !state.shuffle;
-      // Only reshuffle when turning shuffle ON
-      if (newShuffleState && state.queue.length > 0) {
-        // If we have a queue, reshuffle it starting from the current track
-        const currentTrackIndex = state.currentQueueIndex;
-        const currentTrack = state.currentTrack;
 
-        if (currentTrackIndex !== -1 && currentTrack) {
-          // Split the queue into two parts: before and after the current track
-          const beforeCurrent = state.queue.slice(0, currentTrackIndex);
-          const afterCurrent = state.queue.slice(currentTrackIndex + 1);
+      let filtered = sourceTracks;
 
-          // Shuffle both parts
-          const shuffledBefore = [...beforeCurrent].sort(
-            () => Math.random() - 0.5
-          );
-          const shuffledAfter = [...afterCurrent].sort(
-            () => Math.random() - 0.5
-          );
+      if (filterState.selectedGenre) {
+        filtered = filtered.filter(
+          (track) => track.genre === filterState.selectedGenre
+        );
+      }
+      if (filterState.selectedArtist) {
+        filtered = filtered.filter(
+          (track) => track.artist === filterState.selectedArtist
+        );
+      }
+      if (filterState.selectedAlbum) {
+        filtered = filtered.filter(
+          (track) => track.album === filterState.selectedAlbum
+        );
+      }
 
-          // Combine them with the current track in the middle
-          const newQueue = [currentTrack, ...shuffledAfter, ...shuffledBefore];
+      // For played tracks, maintain the order of most recent first
+      if (filterState.selectedSource === "played-tracks") {
+        return filtered;
+      }
 
+      // For other sources, apply the normal sorting
+      return filtered.sort((a, b) => {
+        const comparison = a.title.localeCompare(b.title);
+        return filterState.sortAsc ? comparison : -comparison;
+      });
+    },
+    getUniqueGenres: () => {
+      const { filterState } = get();
+      const sourceMap: Record<string, string> = {
+        "played-tracks": "playedTracks",
+        searches: "searches",
+        feelingLucky: "feelingLucky",
+      };
+      const sourceKey =
+        sourceMap[filterState.selectedSource] || filterState.selectedSource;
+
+      let sourceTracks: Track[] = [];
+
+      if (filterState.selectedSource === "discover") {
+        sourceTracks = [
+          ...(get().trending || []),
+          ...(get().underground || []),
+          ...(get().feelingLucky || []),
+        ];
+      } else if (filterState.selectedSource === "library") {
+        sourceTracks = [
+          ...(get().favorites || []),
+          ...(get().uploads || []),
+          ...(get().playlists || []),
+        ];
+      } else {
+        sourceTracks = (get()[sourceKey] || []) as Track[];
+      }
+
+      return [...new Set(sourceTracks.map((track) => track.genre))];
+    },
+    getUniqueArtists: () => {
+      const { filterState } = get();
+      const sourceMap: Record<string, string> = {
+        "played-tracks": "playedTracks",
+        searches: "searches",
+        feelingLucky: "feelingLucky",
+      };
+      const sourceKey =
+        sourceMap[filterState.selectedSource] || filterState.selectedSource;
+
+      let sourceTracks: Track[] = [];
+
+      if (filterState.selectedSource === "discover") {
+        sourceTracks = [
+          ...(get().trending || []),
+          ...(get().underground || []),
+          ...(get().feelingLucky || []),
+        ];
+      } else if (filterState.selectedSource === "library") {
+        sourceTracks = [
+          ...(get().favorites || []),
+          ...(get().uploads || []),
+          ...(get().playlists || []),
+        ];
+      } else {
+        sourceTracks = (get()[sourceKey] || []) as Track[];
+      }
+
+      return [...new Set(sourceTracks.map((track) => track.artist))];
+    },
+    getUniqueAlbums: () => {
+      const { filterState } = get();
+      const sourceMap: Record<string, string> = {
+        "played-tracks": "playedTracks",
+        searches: "searches",
+        feelingLucky: "feelingLucky",
+      };
+      const sourceKey =
+        sourceMap[filterState.selectedSource] || filterState.selectedSource;
+
+      let sourceTracks: Track[] = [];
+
+      if (filterState.selectedSource === "discover") {
+        sourceTracks = [
+          ...(get().trending || []),
+          ...(get().underground || []),
+          ...(get().feelingLucky || []),
+        ];
+      } else if (filterState.selectedSource === "library") {
+        sourceTracks = [
+          ...(get().favorites || []),
+          ...(get().uploads || []),
+          ...(get().playlists || []),
+        ];
+      } else {
+        sourceTracks = (get()[sourceKey] || []) as Track[];
+      }
+
+      return [...new Set(sourceTracks.map((track) => track.album))];
+    },
+    setTracks: (source, tracks) => set(() => ({ [source]: tracks })),
+    setUserState: (userState: DecodedUserToken) => {
+      set({ userState });
+      // Pre-fetch favorites when user logs in
+      if (userState) {
+        fetchFavoritesTracks(userState.userId);
+        fetchPlaylistsByUser(userState.userId);
+        fetchUploads(userState.userId);
+      }
+      get().updateSources(userState);
+    },
+    getUserState: () => get().userState,
+    setSources: (sources) => set({ sources }),
+    updateSources: (userState) => {
+      const baseSources = [
+        {
+          id: "discover" as const,
+          label: "🔍 Discover",
+          type: "static" as const,
+          children: [
+            {
+              id: "trending" as const,
+              label: "🔥 Trending",
+              type: "static" as const,
+            },
+            {
+              id: "underground" as const,
+              label: "🔊 Underground",
+              type: "static" as const,
+            },
+            {
+              id: "feelingLucky" as const,
+              label: "🎲 Feeling Lucky",
+              type: "static" as const,
+            },
+          ],
+        },
+        {
+          id: "library" as const,
+          label: "📚 Library",
+          type: "static" as const,
+          children: userState
+            ? [
+                {
+                  id: "favorites" as const,
+                  label: "💖 Favorites",
+                  type: "static" as const,
+                },
+                {
+                  id: "uploads" as const,
+                  label: "💿 Uploads",
+                  type: "static" as const,
+                },
+              ]
+            : [],
+        },
+        {
+          id: "recents" as const,
+          label: "⏱️ Recents",
+          type: "static" as const,
+          children: [
+            {
+              id: "searches" as const,
+              label: "🔎 Searches",
+              type: "static" as const,
+            },
+            {
+              id: "played-tracks" as const,
+              label: "🎵 Played Tracks",
+              type: "static" as const,
+            },
+          ],
+        },
+      ] as const;
+
+      set({ sources: baseSources });
+    },
+    addDynamicSource: (source) =>
+      set((state) => ({
+        sources: [...state.sources, source],
+      })),
+    removeDynamicSource: (sourceId) =>
+      set((state) => ({
+        sources: state.sources.filter((source) => source.id !== sourceId),
+      })),
+    setCurrentTrack: (track) => {
+      if (track) {
+        set((state) => {
+          // Find the index of the track in the queue
+          const trackIndex = state.queue.findIndex((t) => t.id === track.id);
           return {
-            shuffle: newShuffleState,
-            queue: newQueue,
-            currentQueueIndex: 0, // Current track is now at index 0
+            currentTrack: track,
+            currentQueueIndex: trackIndex,
+            playbackState: PlaybackState.SONG_PAUSED,
+            playedTracks: [
+              track,
+              ...state.playedTracks.filter((t) => t.id !== track.id),
+            ].slice(0, 100),
+            feelingLucky: [...state.trending, ...state.underground]
+              .sort(() => Math.random() - 0.5)
+              .slice(0, 50),
           };
-        }
+        });
+      } else {
+        set({
+          currentTrack: null,
+          currentQueueIndex: -1,
+          playbackState: PlaybackState.NO_SONG_SELECTED,
+        });
       }
-      // When turning shuffle OFF, just update the state
-      return { shuffle: newShuffleState };
-    }),
-  toggleTheme: () => {
-    const newTheme = !get().isDark;
-    set({ isDark: newTheme });
-    document.documentElement.classList.toggle("dark", newTheme);
-  },
-}));
+    },
+    setPlaybackState: (state) => set({ playbackState: state }),
+    setCurrentTime: (currentTime) =>
+      set((state) => ({
+        currentTime:
+          typeof currentTime === "function"
+            ? currentTime(state.currentTime)
+            : currentTime,
+      })),
+    setDuration: (duration) => set({ duration }),
+    setVolume: (volume) => set({ volume }),
+    toggleQueue: () => set((state) => ({ showQueue: !state.showQueue })),
+    addToQueue: (track) =>
+      set((state) => {
+        // Check if the track is already in the queue
+        const isAlreadyInQueue = state.queue.some((t) => t.id === track.id);
+        if (isAlreadyInQueue) {
+          return state;
+        }
+        return { queue: [...state.queue, track] };
+      }),
+    removeFromQueue: (index) =>
+      set((state) => ({
+        queue: state.queue.filter((_, i) => i !== index),
+        currentQueueIndex:
+          state.currentQueueIndex > index
+            ? state.currentQueueIndex - 1
+            : state.currentQueueIndex,
+      })),
+    clearQueue: () => set({ queue: [], currentQueueIndex: -1 }),
+    nextTrack: () => {
+      const state = get();
+      if (state.currentQueueIndex < state.queue.length - 1) {
+        const nextTrack = state.queue[state.currentQueueIndex + 1];
+        set({
+          currentTrack: nextTrack,
+          currentQueueIndex: state.currentQueueIndex + 1,
+          playbackState: PlaybackState.SONG_PLAYING,
+        });
+      } else {
+        set({
+          currentTrack: null,
+          currentQueueIndex: -1,
+          playbackState: PlaybackState.NO_SONG_SELECTED,
+        });
+      }
+    },
+    skipToTrack: (index: number) => {
+      const state = get();
+      if (index >= 0 && index < state.queue.length) {
+        // Keep only the tracks from the skipped track onwards
+        const newQueue = state.queue.slice(index);
+        set({
+          queue: newQueue,
+          currentQueueIndex: 0, // The skipped track is now at index 0
+        });
+      }
+    },
+    previousTrack: () => {
+      const state = get();
+      if (state.currentQueueIndex > 0) {
+        const prevTrack = state.queue[state.currentQueueIndex - 1];
+        set({
+          currentTrack: prevTrack,
+          currentQueueIndex: state.currentQueueIndex - 1,
+          playbackState: PlaybackState.SONG_PLAYING,
+        });
+      }
+    },
+    toggleLoop: () => set((state) => ({ loop: !state.loop })),
+    toggleShuffle: () =>
+      set((state) => {
+        const newShuffleState = !state.shuffle;
+        // Only reshuffle when turning shuffle ON
+        if (newShuffleState && state.queue.length > 0) {
+          // If we have a queue, reshuffle it starting from the current track
+          const currentTrackIndex = state.currentQueueIndex;
+          const currentTrack = state.currentTrack;
+
+          if (currentTrackIndex !== -1 && currentTrack) {
+            // Split the queue into two parts: before and after the current track
+            const beforeCurrent = state.queue.slice(0, currentTrackIndex);
+            const afterCurrent = state.queue.slice(currentTrackIndex + 1);
+
+            // Shuffle both parts
+            const shuffledBefore = [...beforeCurrent].sort(
+              () => Math.random() - 0.5
+            );
+            const shuffledAfter = [...afterCurrent].sort(
+              () => Math.random() - 0.5
+            );
+
+            // Combine them with the current track in the middle
+            const newQueue = [
+              currentTrack,
+              ...shuffledAfter,
+              ...shuffledBefore,
+            ];
+
+            return {
+              shuffle: newShuffleState,
+              queue: newQueue,
+              currentQueueIndex: 0, // Current track is now at index 0
+            };
+          }
+        }
+        // When turning shuffle OFF, just update the state
+        return { shuffle: newShuffleState };
+      }),
+    toggleTheme: () => {
+      set((state) => {
+        const newIsDark = !state.isDark;
+        if (newIsDark) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+        return { isDark: newIsDark };
+      });
+    },
+  };
+});
