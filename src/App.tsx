@@ -172,6 +172,12 @@ export default function App() {
           }
           setPlaybackState(PlaybackState.SONG_PAUSED);
         }}
+        onEnded={() => {
+          setCurrentTrack(null);
+          setPlaybackState(PlaybackState.NO_SONG_SELECTED);
+          setCurrentTime(0);
+          setDuration(0);
+        }}
         onListen={(e: Event) => {
           const audio = e.target as HTMLAudioElement;
           setCurrentTime(audio.currentTime);
