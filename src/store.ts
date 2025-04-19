@@ -4,7 +4,7 @@ import {
   fetchFavoritesTracks,
   fetchPlaylistsByUser,
   fetchUploads,
-} from "./Sdk";
+} from "./sdk";
 
 export enum PlaybackState {
   NO_SONG_SELECTED = "NO_SONG_SELECTED",
