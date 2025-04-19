@@ -69,27 +69,27 @@ const ContextMenu = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
           onClick={handlePlay}
         >
           Play
         </div>
         <div
-          className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
           onClick={handleViewArtist}
         >
           View Artist: {track.artist}
         </div>
         <div
-          className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
           onClick={handleViewGenre}
         >
           View Genre: {track.genre}
         </div>
-        <div className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
+        <div className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
           Add to Playlist
         </div>
-        <div className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
+        <div className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200">
           Share
         </div>
       </div>
@@ -508,7 +508,7 @@ export default function App() {
                 >
                   <div className="w-full h-1 bg-[#e1dba7] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#7fa6d9] rounded-full"
+                      className="h-full bg-[#E6C7FF] rounded-full"
                       style={{ width: `${(currentTime / duration) * 100}%` }}
                     />
                   </div>
@@ -534,17 +534,17 @@ export default function App() {
       </div>
 
       {/* Main layout */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
-        <div className="w-64 border-r border-[#7fa6d9] p-4 overflow-y-auto flex flex-col brushed-metal">
+        <div className="w-64 border-r border-[#C273FF] p-4 overflow-y-auto flex flex-col brushed-metal">
           <div className="font-bold mb-4">Source</div>
           <ul className="space-y-4 text-sm mb-6">
             {sources.map((source) => (
               <li key={source.id} className="space-y-1">
                 <div
-                  className={`cursor-pointer hover:bg-[#cce6ff] px-2 py-1 rounded ${
+                  className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
                     filterState.selectedSource === source.id
-                      ? "bg-[#cce6ff]"
+                      ? "bg-[#E6C7FF]"
                       : ""
                   }`}
                   onClick={() => setSelectedSource(source.id)}
@@ -568,9 +568,9 @@ export default function App() {
                     {source.children.map((child) => (
                       <li
                         key={child.id}
-                        className={`cursor-pointer hover:bg-[#cce6ff] px-2 py-1 rounded ${
+                        className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
                           filterState.selectedSource === child.id
-                            ? "bg-[#cce6ff]"
+                            ? "bg-[#E6C7FF]"
                             : ""
                         }`}
                         onClick={() => setSelectedSource(child.id)}
@@ -595,10 +595,20 @@ export default function App() {
               </li>
             ))}
           </ul>
-          <div className="mt-auto pt-4 border-t border-[#aac6e6]">
-            <div className="w-48 h-48 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
+          <div className="mt-auto pt-4 border-t border-[#C273FF]">
+            <div
+              className={`${
+                currentTrack?.artwork?._1000x1000 ? "w-48 h-48" : "w-16 h-16"
+              } rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#C273FF] bg-[#E6C7FF]`}
+            >
               {playbackState === PlaybackState.NO_SONG_SELECTED ? (
-                <span className="text-4xl">🎵</span>
+                <span
+                  className={`${
+                    currentTrack?.artwork?._1000x1000 ? "text-4xl" : "text-xl"
+                  }`}
+                >
+                  🎵
+                </span>
               ) : currentTrack?.artwork?._1000x1000 ? (
                 <img
                   src={currentTrack.artwork._1000x1000}
@@ -606,12 +616,16 @@ export default function App() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-4xl">
+                <span
+                  className={`${
+                    currentTrack?.artwork?._1000x1000 ? "text-4xl" : "text-xl"
+                  }`}
+                >
                   {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
                 </span>
               )}
             </div>
-            <div className="text-center text-xs text-[#5b7ca1] mt-2 w-full">
+            <div className="text-center text-xs text-[#4a1a7a] mt-2 w-full">
               {playbackState === PlaybackState.NO_SONG_SELECTED ? (
                 "No track selected"
               ) : (
@@ -625,7 +639,7 @@ export default function App() {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Filters */}
           <div className="flex border-b border-[#999] text-sm h-48 brushed-metal">
             {[
@@ -660,8 +674,8 @@ export default function App() {
                 <div className="flex-1 overflow-y-auto">
                   <ul className="flex flex-col">
                     <li
-                      className={`cursor-pointer px-4 py-2 hover:bg-blue-200/70 ${
-                        !section.selected ? "bg-blue-200/70" : ""
+                      className={`cursor-pointer px-4 py-2 hover:bg-[#E6C7FF]/70 ${
+                        !section.selected ? "bg-[#E6C7FF]/70" : ""
                       }`}
                       onClick={() => section.setSelected(null)}
                     >
@@ -670,8 +684,8 @@ export default function App() {
                     {section.items.map((item) => (
                       <li
                         key={item}
-                        className={`cursor-pointer px-4 py-2 hover:bg-blue-200/70 ${
-                          section.selected === item ? "bg-blue-200/70" : ""
+                        className={`cursor-pointer px-4 py-2 hover:bg-[#E6C7FF]/70 ${
+                          section.selected === item ? "bg-[#E6C7FF]/70" : ""
                         }`}
                         onClick={() => section.setSelected(item)}
                       >
@@ -685,7 +699,7 @@ export default function App() {
           </div>
 
           {/* Track list */}
-          <div className="flex-1 flex flex-col brushed-metal h-full">
+          <div className="flex-1 flex flex-col brushed-metal min-h-0">
             <div className="sticky top-0 z-10 bg-[#d0d0d0] text-left border-b border-[#aaa]">
               <table className="w-full text-sm table-fixed border-collapse">
                 <thead>
@@ -706,15 +720,19 @@ export default function App() {
                 </thead>
               </table>
             </div>
-            <div className="flex-1 overflow-y-auto h-0">
+            <div className="flex-1 overflow-y-auto">
               <table className="w-full text-sm table-fixed border-collapse">
                 <tbody>
                   {getFilteredTracks().map((track, i) => (
                     <tr
                       key={track.id}
                       className={`${
-                        i % 2 === 0 ? "bg-white/40" : "bg-white/20"
-                      } hover:bg-blue-200/70 cursor-pointer`}
+                        currentTrack?.id === track.id
+                          ? "bg-gray-200/70"
+                          : i % 2 === 0
+                          ? "bg-white/40"
+                          : "bg-white/20"
+                      } hover:bg-[#E6C7FF]/70 cursor-pointer`}
                       onDoubleClick={() => handleTrackClick(track)}
                       onContextMenu={(e) => handleContextMenu(e, track)}
                     >
