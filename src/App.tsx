@@ -502,16 +502,26 @@ export default function App() {
                 <span className="text-xs text-zinc-600">
                   {formatTime(currentTime)}
                 </span>
-                <div
-                  className="flex-1 h-4 bg-transparent cursor-pointer flex items-center"
-                  onClick={handleScrubberClick}
-                >
-                  <div className="w-full h-1 bg-[#e1dba7] rounded-full overflow-hidden">
+                <div className="flex-1 h-4 flex items-center relative">
+                  <div
+                    className="w-full h-1 bg-[#e1dba7] rounded-full overflow-hidden cursor-pointer"
+                    onClick={handleScrubberClick}
+                  >
                     <div
                       className="h-full bg-[#E6C7FF] rounded-full"
                       style={{ width: `${(currentTime / duration) * 100}%` }}
                     />
                   </div>
+                  <div
+                    className="absolute h-1.5 w-1.5 rounded-full bg-[#4a1a7a]"
+                    style={{
+                      left: `calc(${
+                        (currentTime / duration) * 100
+                      }% - 0.375rem)`,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                    }}
+                  />
                 </div>
                 <span className="text-xs text-zinc-600">
                   {formatTime(duration)}
@@ -728,10 +738,10 @@ export default function App() {
                       key={track.id}
                       className={`${
                         currentTrack?.id === track.id
-                          ? "bg-gray-200/70"
+                          ? "bg-zinc-400/70"
                           : i % 2 === 0
-                          ? "bg-white/40"
-                          : "bg-white/20"
+                          ? "bg-zinc-100"
+                          : "bg-white"
                       } hover:bg-[#E6C7FF]/70 cursor-pointer`}
                       onDoubleClick={() => handleTrackClick(track)}
                       onContextMenu={(e) => handleContextMenu(e, track)}
