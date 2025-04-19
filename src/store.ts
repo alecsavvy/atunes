@@ -5,7 +5,8 @@ import {
   fetchPlaylistsByUser,
   fetchUploads,
   fetchBestNewReleases,
-  fetchFeed,
+  fetchReposts,
+  fetchMostLovedTracks,
 } from "./sdk";
 
 export enum PlaybackState {
@@ -503,6 +504,8 @@ export const useStore = create<StoreState>((set, get) => {
         fetchPlaylistsByUser(userState.userId);
         fetchUploads(userState.userId);
         fetchBestNewReleases(userState.userId);
+        fetchReposts(userState.userId);
+        fetchMostLovedTracks(userState.userId);
       }
       get().updateSources(userState);
     },
@@ -556,6 +559,11 @@ export const useStore = create<StoreState>((set, get) => {
                 {
                   id: "uploads" as const,
                   label: "💿 Uploads",
+                  type: "static" as const,
+                },
+                {
+                  id: "reposts" as const,
+                  label: "🔄 Reposts",
                   type: "static" as const,
                 },
               ]

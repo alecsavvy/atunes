@@ -223,21 +223,33 @@ export const fetchBestNewReleases = async (userId: string) => {
   useStore.getState().setTracks("bestNewReleases", convertedTracks);
 };
 
-export const fetchFeed = async (userId: string) => {
-  const { data: feedResult } = await audiusSdk.full.users.getUserFeed({
-    id: userId,
-    limit: 100,
-    tracksOnly: true,
-    withUsers: true,
-  });
+export const fetchReposts = async (userId: string) => {
+  try {
+    const { data: activities } = await audiusSdk.full.users.getReposts({
+      id: userId,
+      limit: 100,
+    });
 
-  const tracks =
-    feedResult
-      ?.filter((item) => item.type === "track")
-      .map((item) => item.item) || [];
+    if (!activities) {
+      return;
+    }
 
-  const convertedTracks = (tracks ?? []).map((track, index) =>
-    convertAudiusTrack(track, index, "feed")
-  );
-  useStore.getState().setTracks("feed", convertedTracks);
+    // Filter for track reposts and extract the tracks
+    const reposts = activities
+      .filter((activity) => activity.itemType === "track" && activity.item)
+      .map((activity) => activity.item as Track);
+
+    const { data: tracks } = await audiusSdk.tracks.getBulkTracks({
+      id: reposts.map((track) => track.id),
+    });
+
+    const convertedTracks =
+      tracks?.map((track, index) =>
+        convertAudiusTrack(track, index, "reposts")
+      ) || [];
+
+    useStore.getState().setTracks("reposts", convertedTracks);
+  } catch (error) {
+    console.error("Failed to fetch reposts:", error);
+  }
 };

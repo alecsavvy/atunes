@@ -17,6 +17,7 @@ import {
   getGenreTracks,
   NO_ALBUM,
   fetchBestNewReleases,
+  fetchReposts,
 } from "./sdk";
 import {
   PlaylistFullWithoutTracks,
@@ -560,6 +561,12 @@ export default function App() {
           fetchUploads(userState4.userId);
         }
         break;
+      case "reposts":
+        const userState5 = getUserState();
+        if (userState5) {
+          fetchReposts(userState5.userId);
+        }
+        break;
       default:
         // Handle dynamic playlist sources
         if (sourceId.startsWith("playlist-")) {
@@ -984,73 +991,75 @@ export default function App() {
       {/* Main layout */}
       <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
-        <div className="w-64 border-r border-[#C273FF] p-4 overflow-y-auto flex flex-col brushed-metal">
+        <div className="w-64 border-r border-[#C273FF] p-4 flex flex-col brushed-metal">
           <div className="font-bold mb-4">Source</div>
-          <ul className="space-y-4 text-sm mb-6">
-            {sources.map((source) => (
-              <li key={source.id} className="space-y-1">
-                <div
-                  className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
-                    filterState.selectedSource === source.id
-                      ? "bg-[#E6C7FF] dark:text-black"
-                      : ""
-                  }`}
-                  onClick={() => handleSourceClick(source.id)}
-                  onDoubleClick={() => handleSourceDoubleClick(source.id)}
-                >
-                  {typeof source.icon === "string" &&
-                  source.icon.startsWith("http") ? (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={source.icon}
-                        alt=""
-                        className="w-4 h-4 rounded"
-                      />
-                      {source.label}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      {source.children && (
-                        <span className="text-xs">
-                          {expandedSources.has(source.id) ? "▼" : "▶"}
-                        </span>
-                      )}
-                      {source.label}
-                    </div>
-                  )}
-                </div>
-                {source.children && expandedSources.has(source.id) && (
-                  <ul className="ml-4 space-y-1">
-                    {source.children.map((child) => (
-                      <li
-                        key={child.id}
-                        className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
-                          filterState.selectedSource === child.id
-                            ? "bg-[#E6C7FF] dark:text-black"
-                            : ""
-                        }`}
-                        onClick={() => handleSourceClick(child.id)}
-                      >
-                        {typeof child.icon === "string" &&
-                        child.icon.startsWith("http") ? (
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={child.icon}
-                              alt=""
-                              className="w-4 h-4 rounded"
-                            />
-                            {child.label}
-                          </div>
-                        ) : (
-                          child.label
+          <div className="flex-1 overflow-y-auto">
+            <ul className="space-y-4 text-sm">
+              {sources.map((source) => (
+                <li key={source.id} className="space-y-1">
+                  <div
+                    className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
+                      filterState.selectedSource === source.id
+                        ? "bg-[#E6C7FF] dark:text-black"
+                        : ""
+                    }`}
+                    onClick={() => handleSourceClick(source.id)}
+                    onDoubleClick={() => handleSourceDoubleClick(source.id)}
+                  >
+                    {typeof source.icon === "string" &&
+                    source.icon.startsWith("http") ? (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={source.icon}
+                          alt=""
+                          className="w-4 h-4 rounded"
+                        />
+                        {source.label}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {source.children && (
+                          <span className="text-xs">
+                            {expandedSources.has(source.id) ? "▼" : "▶"}
+                          </span>
                         )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
+                        {source.label}
+                      </div>
+                    )}
+                  </div>
+                  {source.children && expandedSources.has(source.id) && (
+                    <ul className="ml-4 space-y-1">
+                      {source.children.map((child) => (
+                        <li
+                          key={child.id}
+                          className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
+                            filterState.selectedSource === child.id
+                              ? "bg-[#E6C7FF] dark:text-black"
+                              : ""
+                          }`}
+                          onClick={() => handleSourceClick(child.id)}
+                        >
+                          {typeof child.icon === "string" &&
+                          child.icon.startsWith("http") ? (
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={child.icon}
+                                alt=""
+                                className="w-4 h-4 rounded"
+                              />
+                              {child.label}
+                            </div>
+                          ) : (
+                            child.label
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
           <div className="mt-auto pt-4 border-t border-[#C273FF]">
             <div
               className={`${
