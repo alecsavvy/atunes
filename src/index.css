@@ -121,3 +121,18 @@ table thead {
   border-bottom: 1px solid #555;
   box-shadow: inset 0 -1px 0 #444;
 }
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.33%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll linear infinite;
+  animation-play-state: running;
+  animation-duration: 20s;
+}

@@ -95,6 +95,56 @@ const ContextMenu = ({
   );
 };
 
+const ScrollingText = ({
+  text,
+  isPlaying,
+}: {
+  text: string;
+  isPlaying: boolean;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current || !textRef.current) return;
+
+    const containerWidth = containerRef.current.offsetWidth;
+    const textWidth = textRef.current.offsetWidth;
+    setShouldScroll(textWidth > containerWidth);
+  }, [text]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="overflow-hidden whitespace-nowrap w-[75%] mx-auto"
+    >
+      <div
+        ref={textRef}
+        className={`inline-block ${
+          shouldScroll && isPlaying ? "animate-scroll" : ""
+        }`}
+      >
+        {shouldScroll && isPlaying ? (
+          <>
+            {text}
+            <span className="mx-4">•</span>
+            {text}
+            <span className="mx-4">•</span>
+            {text}
+            <span className="mx-4">•</span>
+            {text}
+            <span className="mx-4">•</span>
+            {text}
+          </>
+        ) : (
+          text
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark")
@@ -455,10 +505,15 @@ export default function App() {
                 </span>
               )}
             </div>
-            <div className="text-center text-xs text-[#5b7ca1] mt-2">
-              {playbackState === PlaybackState.NO_SONG_SELECTED
-                ? "Now Playing..."
-                : currentTrack?.artist}
+            <div className="text-center text-xs text-[#5b7ca1] mt-2 w-full">
+              {playbackState === PlaybackState.NO_SONG_SELECTED ? (
+                "No track selected"
+              ) : (
+                <ScrollingText
+                  text={`${currentTrack?.title} - ${currentTrack?.artist} - ${currentTrack?.album}`}
+                  isPlaying={playbackState === PlaybackState.SONG_PLAYING}
+                />
+              )}
             </div>
           </div>
         </div>
