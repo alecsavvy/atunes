@@ -198,3 +198,46 @@ export const getGenreTracks = async (genre: string) => {
   const tracks = searchResult?.tracks ?? [];
   return tracks;
 };
+
+export const fetchMostLovedTracks = async (userId: string) => {
+  const { data: tracks } = await audiusSdk.full.tracks.getMostLovedTracks({
+    limit: 100,
+    userId: userId,
+    withUsers: true,
+  });
+  const convertedTracks = (tracks ?? []).map((track, index) =>
+    convertAudiusTrack(track, index, "mostLovedTracks")
+  );
+  useStore.getState().setTracks("mostLovedTracks", convertedTracks);
+};
+
+export const fetchBestNewReleases = async (userId: string) => {
+  const { data: tracks } = await audiusSdk.full.tracks.getBestNewReleases({
+    limit: 100,
+    userId: userId,
+    window: "month",
+  });
+  const convertedTracks = (tracks ?? []).map((track, index) =>
+    convertAudiusTrack(track, index, "bestNewReleases")
+  );
+  useStore.getState().setTracks("bestNewReleases", convertedTracks);
+};
+
+export const fetchFeed = async (userId: string) => {
+  const { data: feedResult } = await audiusSdk.full.users.getUserFeed({
+    id: userId,
+    limit: 100,
+    tracksOnly: true,
+    withUsers: true,
+  });
+
+  const tracks =
+    feedResult
+      ?.filter((item) => item.type === "track")
+      .map((item) => item.item) || [];
+
+  const convertedTracks = (tracks ?? []).map((track, index) =>
+    convertAudiusTrack(track, index, "feed")
+  );
+  useStore.getState().setTracks("feed", convertedTracks);
+};

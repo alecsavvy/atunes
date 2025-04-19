@@ -4,6 +4,8 @@ import {
   fetchFavoritesTracks,
   fetchPlaylistsByUser,
   fetchUploads,
+  fetchBestNewReleases,
+  fetchFeed,
 } from "./sdk";
 
 export enum PlaybackState {
@@ -44,6 +46,9 @@ type FilterState = {
     | "recents"
     | "searches"
     | "played-tracks"
+    | "mostLovedTracks"
+    | "bestNewReleases"
+    | "feed"
     | string;
   selectedGenre: string | null;
   selectedArtist: string | null;
@@ -78,6 +83,9 @@ type StoreState = {
   searches: Track[];
   playedTracks: Track[];
   feelingLucky: Track[];
+  mostLovedTracks: Track[];
+  bestNewReleases: Track[];
+  feed: Track[];
   currentTrack: Track | null;
   queue: Track[];
   currentQueueIndex: number;
@@ -162,6 +170,9 @@ export const useStore = create<StoreState>((set, get) => {
     searches: [],
     playedTracks: [],
     feelingLucky: [],
+    mostLovedTracks: [],
+    bestNewReleases: [],
+    feed: [],
     currentTrack: null,
     queue: [],
     currentQueueIndex: -1,
@@ -209,18 +220,7 @@ export const useStore = create<StoreState>((set, get) => {
         id: "library" as const,
         label: "📚 Library",
         type: "static" as const,
-        children: [
-          {
-            id: "favorites" as const,
-            label: "💖 Favorites",
-            type: "static" as const,
-          },
-          {
-            id: "uploads" as const,
-            label: "💿 Uploads",
-            type: "static" as const,
-          },
-        ],
+        children: [],
       },
       {
         id: "recents" as const,
@@ -316,6 +316,8 @@ export const useStore = create<StoreState>((set, get) => {
           ...(get().favorites || []),
           ...(get().uploads || []),
           ...(get().playlists || []),
+          ...(get().bestNewReleases || []),
+          ...(get().feed || []),
         ];
         sourceTracks = allTracks.filter(
           (track, index, self) =>
@@ -410,6 +412,8 @@ export const useStore = create<StoreState>((set, get) => {
           ...(get().favorites || []),
           ...(get().uploads || []),
           ...(get().playlists || []),
+          ...(get().bestNewReleases || []),
+          ...(get().feed || []),
         ];
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
@@ -440,6 +444,8 @@ export const useStore = create<StoreState>((set, get) => {
           ...(get().favorites || []),
           ...(get().uploads || []),
           ...(get().playlists || []),
+          ...(get().bestNewReleases || []),
+          ...(get().feed || []),
         ];
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
@@ -470,6 +476,8 @@ export const useStore = create<StoreState>((set, get) => {
           ...(get().favorites || []),
           ...(get().uploads || []),
           ...(get().playlists || []),
+          ...(get().bestNewReleases || []),
+          ...(get().feed || []),
         ];
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
@@ -494,6 +502,7 @@ export const useStore = create<StoreState>((set, get) => {
         fetchFavoritesTracks(userState.userId);
         fetchPlaylistsByUser(userState.userId);
         fetchUploads(userState.userId);
+        fetchBestNewReleases(userState.userId);
       }
       get().updateSources(userState);
     },
@@ -532,6 +541,16 @@ export const useStore = create<StoreState>((set, get) => {
                 {
                   id: "favorites" as const,
                   label: "💖 Favorites",
+                  type: "static" as const,
+                },
+                {
+                  id: "mostLovedTracks" as const,
+                  label: "❤️ Most Loved",
+                  type: "static" as const,
+                },
+                {
+                  id: "bestNewReleases" as const,
+                  label: "✨ Best New Releases",
                   type: "static" as const,
                 },
                 {

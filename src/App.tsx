@@ -5,6 +5,7 @@ import {
   fetchFeelingLuckyTracks,
   fetchTrendingTracks,
   fetchUndergroundTracks,
+  fetchMostLovedTracks,
   getStreamUrl,
   fetchFavoritesTracks,
   fetchUploads,
@@ -15,6 +16,7 @@ import {
   getArtistTracks,
   getGenreTracks,
   NO_ALBUM,
+  fetchBestNewReleases,
 } from "./sdk";
 import {
   PlaylistFullWithoutTracks,
@@ -540,10 +542,22 @@ export default function App() {
           fetchFavoritesTracks(userState.userId);
         }
         break;
-      case "uploads":
+      case "mostLovedTracks":
         const userState2 = getUserState();
         if (userState2) {
-          fetchUploads(userState2.userId);
+          fetchMostLovedTracks(userState2.userId);
+        }
+        break;
+      case "bestNewReleases":
+        const userState3 = getUserState();
+        if (userState3) {
+          fetchBestNewReleases(userState3.userId);
+        }
+        break;
+      case "uploads":
+        const userState4 = getUserState();
+        if (userState4) {
+          fetchUploads(userState4.userId);
         }
         break;
       default:
