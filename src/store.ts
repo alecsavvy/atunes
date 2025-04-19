@@ -488,11 +488,11 @@ export const useStore = create<StoreState>((set, get) => {
     },
     setTracks: (source, tracks) => {
       // Clear any existing tracks for this source before setting new ones
-      set((state) => ({
+      set((_) => ({
         [source]: [],
       }));
       // Then set the new tracks
-      set((state) => ({
+      set((_) => ({
         [source]: tracks,
       }));
     },
