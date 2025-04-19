@@ -787,7 +787,7 @@ export default function App() {
                 <div
                   className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
                     filterState.selectedSource === source.id
-                      ? "bg-[#E6C7FF]"
+                      ? "bg-[#E6C7FF] dark:text-black"
                       : ""
                   }`}
                   onClick={() => setSelectedSource(source.id)}
@@ -821,7 +821,7 @@ export default function App() {
                         key={child.id}
                         className={`cursor-pointer hover:bg-[#E6C7FF] px-2 py-1 rounded ${
                           filterState.selectedSource === child.id
-                            ? "bg-[#E6C7FF]"
+                            ? "bg-[#E6C7FF] dark:text-black"
                             : ""
                         }`}
                         onClick={() => setSelectedSource(child.id)}
