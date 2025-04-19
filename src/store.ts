@@ -470,20 +470,26 @@ export const useStore = create<StoreState>((set, get) => ({
     })),
   setCurrentTrack: (track) => {
     if (track) {
-      set((state) => ({
-        currentTrack: track,
-        playbackState: PlaybackState.SONG_PAUSED,
-        playedTracks: [
-          track,
-          ...state.playedTracks.filter((t) => t.id !== track.id),
-        ].slice(0, 100),
-        feelingLucky: [...state.trending, ...state.underground]
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 50),
-      }));
+      set((state) => {
+        // Find the index of the track in the queue
+        const trackIndex = state.queue.findIndex((t) => t.id === track.id);
+        return {
+          currentTrack: track,
+          currentQueueIndex: trackIndex,
+          playbackState: PlaybackState.SONG_PAUSED,
+          playedTracks: [
+            track,
+            ...state.playedTracks.filter((t) => t.id !== track.id),
+          ].slice(0, 100),
+          feelingLucky: [...state.trending, ...state.underground]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 50),
+        };
+      });
     } else {
       set({
         currentTrack: null,
+        currentQueueIndex: -1,
         playbackState: PlaybackState.NO_SONG_SELECTED,
       });
     }

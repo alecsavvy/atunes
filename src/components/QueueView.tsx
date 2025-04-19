@@ -11,6 +11,16 @@ export const QueueView: React.FC = () => {
     skipToTrack,
   } = useStore();
 
+  // Reorder queue based on currentQueueIndex
+  const orderedQueue = React.useMemo(() => {
+    if (currentQueueIndex === -1 || queue.length === 0) return queue;
+
+    // Create a new array starting from the current index
+    const rotatedQueue = [...queue];
+    const itemsToMove = rotatedQueue.splice(0, currentQueueIndex);
+    return [...rotatedQueue, ...itemsToMove];
+  }, [queue, currentQueueIndex]);
+
   return (
     <div className="flex flex-col h-full">
       <div className="sticky top-0 z-10 bg-[#d0d0d0] text-left border-b border-[#aaa] shadow-inner brushed-metal">
@@ -46,7 +56,7 @@ export const QueueView: React.FC = () => {
           </div>
         </div>
       )}
-      {queue.length > 0 ? (
+      {orderedQueue.length > 0 ? (
         <div className="flex-1 overflow-y-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-[#d0d0d0] z-10">
@@ -78,7 +88,7 @@ export const QueueView: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {queue.map((track, index) => (
+              {orderedQueue.map((track, index) => (
                 <tr
                   key={track.id}
                   className={`${

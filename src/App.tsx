@@ -198,6 +198,7 @@ export default function App() {
     removeFromQueue,
     clearQueue,
     queue,
+    currentQueueIndex,
     toggleLoop,
     toggleShuffle,
     loop,
@@ -242,8 +243,16 @@ export default function App() {
     // Find the index of the clicked track
     const trackIndex = allTracks.findIndex((t) => t.id === track.id);
 
+    // Add the clicked track to the queue
+    addToQueue(track);
+
     // Add all tracks from the clicked track onwards to the queue
     for (let i = trackIndex + 1; i < allTracks.length; i++) {
+      addToQueue(allTracks[i]);
+    }
+
+    // Add tracks before the clicked track to the end of the queue
+    for (let i = 0; i < trackIndex; i++) {
       addToQueue(allTracks[i]);
     }
 
@@ -281,19 +290,18 @@ export default function App() {
       setCurrentTime(0);
       setPlaybackState(PlaybackState.SONG_PLAYING);
       removeFromQueue(0); // Remove the track that just started playing
-      return;
-    }
-
-    if (playbackState === PlaybackState.SONG_PLAYING) {
-      if (audioPlayerRef.current) {
-        audioPlayerRef.current.audio.current.pause();
-      }
-      setPlaybackState(PlaybackState.SONG_PAUSED);
     } else {
-      if (audioPlayerRef.current) {
-        audioPlayerRef.current.audio.current.play();
+      if (playbackState === PlaybackState.SONG_PLAYING) {
+        if (audioPlayerRef.current) {
+          audioPlayerRef.current.audio.current.pause();
+        }
+        setPlaybackState(PlaybackState.SONG_PAUSED);
+      } else {
+        if (audioPlayerRef.current) {
+          audioPlayerRef.current.audio.current.play();
+        }
+        setPlaybackState(PlaybackState.SONG_PLAYING);
       }
-      setPlaybackState(PlaybackState.SONG_PLAYING);
     }
   };
 
@@ -431,20 +439,48 @@ export default function App() {
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-3">
+              {/* ===== PREVIOUS TRACK BUTTON =====
+               * Adds current track to beginning of queue and plays previous track
+               * Located on the left side of the play/pause button
+               */}
               <button
                 className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
                 onClick={() => {
-                  if (currentTrack && queue.length > 0) {
-                    // Add current track to the end of queue if loop is enabled
-                    if (loop) {
-                      addToQueue(currentTrack);
+                  if (currentTrack) {
+                    if (queue.length > 0) {
+                      if (loop) {
+                        // In loop mode, move to the previous track in queue
+                        const newIndex =
+                          currentQueueIndex === -1
+                            ? queue.length - 1
+                            : (currentQueueIndex - 1 + queue.length) %
+                              queue.length;
+                        setCurrentTrack(queue[newIndex]);
+                        setAudioSource(null);
+                        setCurrentTime(0);
+                        setPlaybackState(PlaybackState.SONG_PLAYING);
+                      } else {
+                        // In non-loop mode, remove the track from queue
+                        const prevTrack = queue[queue.length - 1];
+                        setCurrentTrack(prevTrack);
+                        setAudioSource(null);
+                        setCurrentTime(0);
+                        setPlaybackState(PlaybackState.SONG_PLAYING);
+                        removeFromQueue(queue.length - 1);
+                      }
+                    } else if (loop) {
+                      // If queue is empty and loop is on, wrap to the end
+                      const allTracks = getFilteredTracks();
+                      const currentIndex = allTracks.findIndex(
+                        (t) => t.id === currentTrack.id
+                      );
+                      if (currentIndex > 0) {
+                        setCurrentTrack(allTracks[currentIndex - 1]);
+                        setAudioSource(null);
+                        setCurrentTime(0);
+                        setPlaybackState(PlaybackState.SONG_PLAYING);
+                      }
                     }
-                    // Set next track from queue as current
-                    setCurrentTrack(queue[0]);
-                    setAudioSource(null);
-                    setCurrentTime(0);
-                    setPlaybackState(PlaybackState.SONG_PLAYING);
-                    removeFromQueue(0);
                   }
                 }}
               >
@@ -456,8 +492,9 @@ export default function App() {
                   stroke="currentColor"
                   strokeWidth="1"
                   className={
-                    playbackState === PlaybackState.NO_SONG_SELECTED &&
-                    queue.length === 0
+                    (playbackState === PlaybackState.NO_SONG_SELECTED &&
+                      queue.length === 0) ||
+                    !loop
                       ? "text-zinc-400"
                       : "text-zinc-800"
                   }
@@ -466,6 +503,10 @@ export default function App() {
                   <path d="M8 4L0 12L8 20V4Z" fill="currentColor" />
                 </svg>
               </button>
+              {/* ===== PLAY/PAUSE BUTTON =====
+               * Toggles between play triangle and pause bars based on playback state
+               * Located in the top bar between previous and next track buttons
+               */}
               <button
                 className="w-10 h-10 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
                 onClick={togglePlayback}
@@ -502,19 +543,45 @@ export default function App() {
                   </svg>
                 )}
               </button>
+              {/* ===== NEXT TRACK BUTTON =====
+               * Adds current track to end of queue (if loop enabled) and plays next track
+               * Located on the right side of the play/pause button
+               */}
               <button
                 className="w-8 h-8 rounded-full bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] border border-[#e1dba7] shadow-inner flex items-center justify-center hover:from-[#f4f1cd] hover:to-[#fdfae7] transition-all active:shadow-none active:translate-y-0.5 active:from-[#e1dba7] active:to-[#d4d0b8]"
                 onClick={() => {
                   if (currentTrack) {
-                    // Add current track to the beginning of queue
-                    addToQueue(currentTrack);
-                    // If we have a previous track in history, play it
                     if (queue.length > 0) {
-                      setCurrentTrack(queue[queue.length - 1]);
-                      setAudioSource(null);
-                      setCurrentTime(0);
-                      setPlaybackState(PlaybackState.SONG_PLAYING);
-                      removeFromQueue(queue.length - 1);
+                      if (loop) {
+                        // In loop mode, move to the next track in queue
+                        const newIndex =
+                          currentQueueIndex === -1
+                            ? 0
+                            : (currentQueueIndex + 1) % queue.length;
+                        setCurrentTrack(queue[newIndex]);
+                        setAudioSource(null);
+                        setCurrentTime(0);
+                        setPlaybackState(PlaybackState.SONG_PLAYING);
+                      } else {
+                        // In non-loop mode, remove the track from queue
+                        setCurrentTrack(queue[0]);
+                        setAudioSource(null);
+                        setCurrentTime(0);
+                        setPlaybackState(PlaybackState.SONG_PLAYING);
+                        removeFromQueue(0);
+                      }
+                    } else if (loop) {
+                      // If queue is empty and loop is on, wrap to the beginning
+                      const allTracks = getFilteredTracks();
+                      const currentIndex = allTracks.findIndex(
+                        (t) => t.id === currentTrack.id
+                      );
+                      if (currentIndex < allTracks.length - 1) {
+                        setCurrentTrack(allTracks[currentIndex + 1]);
+                        setAudioSource(null);
+                        setCurrentTime(0);
+                        setPlaybackState(PlaybackState.SONG_PLAYING);
+                      }
                     }
                   }
                 }}
