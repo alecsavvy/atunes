@@ -14,9 +14,17 @@ interface ContextMenuProps {
   track: Track;
   position: { x: number; y: number };
   onClose: () => void;
+  setAudioSource: (source: string | null) => void;
+  setCurrentTime: (time: number) => void;
 }
 
-const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
+const ContextMenu = ({
+  track,
+  position,
+  onClose,
+  setAudioSource,
+  setCurrentTime,
+}: ContextMenuProps) => {
   const {
     setSelectedArtist,
     setSelectedGenre,
@@ -37,6 +45,8 @@ const ContextMenu = ({ track, position, onClose }: ContextMenuProps) => {
 
   const handlePlay = () => {
     setCurrentTrack(track);
+    setAudioSource(null); // Reset audio source to trigger new URL fetch
+    setCurrentTime(0);
     setPlaybackState(PlaybackState.SONG_PLAYING);
     onClose();
   };
@@ -524,6 +534,8 @@ export default function App() {
           track={contextMenu.track}
           position={contextMenu.position}
           onClose={() => setContextMenu(null)}
+          setAudioSource={setAudioSource}
+          setCurrentTime={setCurrentTime}
         />
       )}
     </div>
