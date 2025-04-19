@@ -43,14 +43,8 @@ const ContextMenu = ({
   setAudioSource,
   setCurrentTime,
 }: ContextMenuProps) => {
-  const {
-    setSelectedArtist,
-    setSelectedGenre,
-    setCurrentTrack,
-    setPlaybackState,
-    addToQueue,
-    setSelectedSource,
-  } = useStore();
+  const { setCurrentTrack, setPlaybackState, addToQueue, setSelectedSource } =
+    useStore();
   const [, setIsHovered] = useState(false);
 
   const handleViewArtist = async () => {
