@@ -109,16 +109,13 @@ export default function App() {
           </button>
           <button className="aqua-button">⏭️</button>
         </div>
-        <div className="w-150 py-4 rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 text-center">
+        <div className="relative min-w-[50%] h-[60px] rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 flex items-center justify-center">
           {playbackState === PlaybackState.NO_SONG_SELECTED ? (
-            <img src={AudiusGlyph} alt="Audius" className="w-6 h-6 mx-auto" />
+            <img src={AudiusGlyph} alt="Audius" className="w-6 h-6" />
           ) : (
-            <div className="px-4">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center shadow-inner border border-[#8caacc]">
-                  <span>🎵</span>
-                </div>
-                <div className="flex-1">
+            <div className="w-full h-full flex flex-col justify-center px-6">
+              <div className="flex items-center justify-center mb-6">
+                <div className="text-center">
                   <div className="text-sm font-medium truncate">
                     {currentTrack?.title || "No track playing"}
                   </div>
@@ -127,7 +124,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="absolute bottom-2 left-6 right-6 flex items-center gap-2">
                 <span className="text-xs text-zinc-600">
                   {formatTime(currentTime)}
                 </span>
@@ -177,10 +174,18 @@ export default function App() {
           </ul>
           <div className="mt-auto pt-4 border-t border-[#aac6e6]">
             <div className="w-16 h-16 bg-[#c5d8ef] rounded overflow-hidden flex items-center justify-center mx-auto shadow-inner border border-[#8caacc]">
-              <span>🎵</span>
+              {playbackState === PlaybackState.NO_SONG_SELECTED ? (
+                <span>🎵</span>
+              ) : (
+                <span className="text-2xl">
+                  {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
+                </span>
+              )}
             </div>
             <div className="text-center text-xs text-[#5b7ca1] mt-2">
-              Now Playing...
+              {playbackState === PlaybackState.NO_SONG_SELECTED
+                ? "Now Playing..."
+                : currentTrack?.artist}
             </div>
           </div>
         </div>
