@@ -54,6 +54,7 @@ type StoreState = {
   playbackState: PlaybackState;
   currentTime: number;
   duration: number;
+  volume: number;
   [key: string]:
     | Track[]
     | FilterState
@@ -88,6 +89,7 @@ type StoreState = {
   setPlaybackState: (state: PlaybackState) => void;
   setCurrentTime: (currentTime: number | ((prev: number) => number)) => void;
   setDuration: (duration: number) => void;
+  setVolume: (volume: number) => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -101,6 +103,7 @@ export const useStore = create<StoreState>((set, get) => ({
   playbackState: PlaybackState.NO_SONG_SELECTED,
   currentTime: 0,
   duration: 0,
+  volume: 1.0,
   filterState: {
     selectedSource: "trending",
     selectedGenre: null,
@@ -255,4 +258,5 @@ export const useStore = create<StoreState>((set, get) => ({
           : currentTime,
     })),
   setDuration: (duration) => set({ duration }),
+  setVolume: (volume) => set({ volume }),
 }));

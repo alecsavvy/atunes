@@ -131,3 +131,15 @@ export const fetchPlaylistsByUser = async (userId: string) => {
     })
   );
 };
+
+export const getStreamUrl = async (trackId: string): Promise<string> => {
+  try {
+    const streamUrl = await audiusSdk.tracks.getTrackStreamUrl({
+      trackId: trackId,
+    });
+    return streamUrl;
+  } catch (error) {
+    console.error("Failed to get stream URL:", error);
+    throw error;
+  }
+};

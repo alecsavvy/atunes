@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import AudiusGlyph from "./assets/audius_glyph.svg";
 import { useStore, PlaybackState, Track } from "./store";
-import { fetchTrendingTracks, fetchUndergroundTracks } from "./Sdk";
+import {
+  fetchTrendingTracks,
+  fetchUndergroundTracks,
+  getStreamUrl,
+} from "./Sdk";
 import Login from "./Login";
-import { initializeAudioPlayer } from "./audioPlayer";
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 
 export default function App() {
   const [isDark, setIsDark] = useState(() =>
@@ -31,12 +36,32 @@ export default function App() {
     setPlaybackState,
     setCurrentTime,
     setDuration,
+    volume,
+    setVolume,
   } = useStore();
 
-  // Initialize audio player
+  const [localVolume, setLocalVolume] = useState(volume);
+
+  const audioPlayerRef = useRef<AudioPlayer>(null);
+
+  const [audioSource, setAudioSource] = useState<string | null>(null);
+
+  // Update local volume when store volume changes (e.g. from other components)
   useEffect(() => {
-    initializeAudioPlayer();
-  }, []);
+    setLocalVolume(volume);
+  }, [volume]);
+
+  // Debounced volume update
+  const debouncedSetVolume = useCallback(
+    (newVolume: number) => {
+      setLocalVolume(newVolume);
+      const timeoutId = setTimeout(() => {
+        setVolume(newVolume);
+      }, 100); // 100ms debounce
+      return () => clearTimeout(timeoutId);
+    },
+    [setVolume]
+  );
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -51,9 +76,9 @@ export default function App() {
 
   const handleTrackClick = (track: Track) => {
     setCurrentTrack(track);
-    setDuration(parseDuration(track.duration));
+    setAudioSource(null); // Reset audio source to trigger new URL fetch
     setCurrentTime(0);
-    setPlaybackState(PlaybackState.SONG_PAUSED);
+    setPlaybackState(PlaybackState.SONG_PLAYING);
   };
 
   const handleScrubberClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -66,14 +91,23 @@ export default function App() {
     const newTime = Math.floor(duration * percentage);
 
     setCurrentTime(newTime);
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.audio.current.currentTime = newTime;
+    }
   };
 
   const togglePlayback = () => {
     if (playbackState === PlaybackState.NO_SONG_SELECTED) return;
 
     if (playbackState === PlaybackState.SONG_PLAYING) {
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.audio.current.pause();
+      }
       setPlaybackState(PlaybackState.SONG_PAUSED);
     } else {
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.audio.current.play();
+      }
       setPlaybackState(PlaybackState.SONG_PLAYING);
     }
   };
@@ -86,6 +120,30 @@ export default function App() {
 
   // Fetch tracks when source changes
   useEffect(() => {}, [filterState.selectedSource]);
+
+  useEffect(() => {
+    if (currentTrack && !audioSource) {
+      getStreamUrl(currentTrack.id)
+        .then((streamUrl) => {
+          setAudioSource(streamUrl);
+          if (audioPlayerRef.current) {
+            audioPlayerRef.current.audio.current.src = streamUrl;
+            if (playbackState === PlaybackState.SONG_PLAYING) {
+              audioPlayerRef.current.audio.current.play();
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to get stream URL:", error);
+        });
+    }
+  }, [currentTrack, playbackState, audioSource]);
+
+  useEffect(() => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.audio.current.volume = volume;
+    }
+  }, [volume]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -103,14 +161,61 @@ export default function App() {
     <div
       className={`${fontClass} h-screen flex flex-col ${isDark ? "dark" : ""}`}
     >
+      {/* Hidden audio player */}
+      <AudioPlayer
+        ref={audioPlayerRef}
+        style={{ display: "none" }}
+        onPlay={() => {
+          if (audioPlayerRef.current) {
+            setCurrentTime(audioPlayerRef.current.audio.current.currentTime);
+          }
+          setPlaybackState(PlaybackState.SONG_PLAYING);
+        }}
+        onPause={() => {
+          if (audioPlayerRef.current) {
+            setCurrentTime(audioPlayerRef.current.audio.current.currentTime);
+          }
+          setPlaybackState(PlaybackState.SONG_PAUSED);
+        }}
+        onListen={(e: Event) => {
+          const audio = e.target as HTMLAudioElement;
+          setCurrentTime(audio.currentTime);
+        }}
+        onLoadedMetaData={(e: Event) => {
+          const audio = e.target as HTMLAudioElement;
+          setDuration(audio.duration);
+        }}
+        onSeeked={(e: Event) => {
+          const audio = e.target as HTMLAudioElement;
+          setCurrentTime(audio.currentTime);
+        }}
+      />
+
       {/* Top bar */}
       <div className="relative flex items-center justify-between px-4 py-4 border-b border-[#999] shadow-inner brushed-metal">
         <div className="flex items-center gap-2">
-          <button className="aqua-button">⏮️</button>
-          <button className="aqua-button" onClick={togglePlayback}>
-            {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
-          </button>
-          <button className="aqua-button">⏭️</button>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2">
+              <button className="aqua-button">⏮️</button>
+              <button className="aqua-button" onClick={togglePlayback}>
+                {playbackState === PlaybackState.SONG_PLAYING ? "⏸️" : "▶️"}
+              </button>
+              <button className="aqua-button">⏭️</button>
+            </div>
+            <div className="flex items-center gap-2 w-full px-2">
+              <span className="text-xs">🔈</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={localVolume}
+                onChange={(e) => debouncedSetVolume(parseFloat(e.target.value))}
+                className="w-24 h-1 bg-[#e1dba7] rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#7fa6d9]"
+              />
+              <span className="text-xs">🔊</span>
+            </div>
+          </div>
         </div>
         <div className="relative min-w-[50%] h-[60px] rounded-full shadow-inner border border-[#e1dba7] bg-gradient-to-b from-[#fdfae7] to-[#f4f1cd] text-sm text-zinc-700 flex items-center justify-center">
           {playbackState === PlaybackState.NO_SONG_SELECTED ? (
