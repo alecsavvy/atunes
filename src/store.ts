@@ -298,17 +298,27 @@ export const useStore = create<StoreState>((set, get) => {
 
       // Handle aggregation for discover and library sources
       if (filterState.selectedSource === "discover") {
-        sourceTracks = [
+        // Combine tracks and deduplicate by id
+        const allTracks = [
           ...(get().trending || []),
           ...(get().underground || []),
           ...(get().feelingLucky || []),
         ];
+        sourceTracks = allTracks.filter(
+          (track, index, self) =>
+            index === self.findIndex((t) => t.id === track.id)
+        );
       } else if (filterState.selectedSource === "library") {
-        sourceTracks = [
+        // Combine tracks and deduplicate by id
+        const allTracks = [
           ...(get().favorites || []),
           ...(get().uploads || []),
           ...(get().playlists || []),
         ];
+        sourceTracks = allTracks.filter(
+          (track, index, self) =>
+            index === self.findIndex((t) => t.id === track.id)
+        );
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
       }
@@ -432,7 +442,16 @@ export const useStore = create<StoreState>((set, get) => {
 
       return [...new Set(sourceTracks.map((track) => track.album))];
     },
-    setTracks: (source, tracks) => set(() => ({ [source]: tracks })),
+    setTracks: (source, tracks) => {
+      // Clear any existing tracks for this source before setting new ones
+      set((state) => ({
+        [source]: [],
+      }));
+      // Then set the new tracks
+      set((state) => ({
+        [source]: tracks,
+      }));
+    },
     setUserState: (userState: DecodedUserToken) => {
       set({ userState });
       // Pre-fetch favorites when user logs in
