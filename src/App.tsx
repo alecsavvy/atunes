@@ -12,6 +12,7 @@ import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
+import { QueueView } from "./components/QueueView";
 
 interface ContextMenuProps {
   track: Track;
@@ -33,6 +34,7 @@ const ContextMenu = ({
     setSelectedGenre,
     setCurrentTrack,
     setPlaybackState,
+    addToQueue,
   } = useStore();
   const [, setIsHovered] = useState(false);
 
@@ -51,6 +53,11 @@ const ContextMenu = ({
     setAudioSource(null); // Reset audio source to trigger new URL fetch
     setCurrentTime(0);
     setPlaybackState(PlaybackState.SONG_PLAYING);
+    onClose();
+  };
+
+  const handleAddToQueue = () => {
+    addToQueue(track);
     onClose();
   };
 
@@ -73,6 +80,12 @@ const ContextMenu = ({
           onClick={handlePlay}
         >
           Play
+        </div>
+        <div
+          className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
+          onClick={handleAddToQueue}
+        >
+          Add to Queue
         </div>
         <div
           className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
@@ -179,6 +192,11 @@ export default function App() {
     setDuration,
     volume,
     setVolume,
+    showQueue,
+    toggleQueue,
+    addToQueue,
+    removeFromQueue,
+    queue,
   } = useStore();
 
   const [localVolume, setLocalVolume] = useState(0.7);
@@ -329,10 +347,19 @@ export default function App() {
           setPlaybackState(PlaybackState.SONG_PAUSED);
         }}
         onEnded={() => {
-          setCurrentTrack(null);
-          setPlaybackState(PlaybackState.NO_SONG_SELECTED);
-          setCurrentTime(0);
-          setDuration(0);
+          const nextTrack = queue[0];
+          if (nextTrack) {
+            setCurrentTrack(nextTrack);
+            setAudioSource(null); // Reset audio source to trigger new URL fetch
+            setCurrentTime(0);
+            setPlaybackState(PlaybackState.SONG_PLAYING);
+            removeFromQueue(0); // Remove the track that just started playing
+          } else {
+            setCurrentTrack(null);
+            setPlaybackState(PlaybackState.NO_SONG_SELECTED);
+            setCurrentTime(0);
+            setDuration(0);
+          }
         }}
         onListen={(e: Event) => {
           const audio = e.target as HTMLAudioElement;
@@ -650,119 +677,129 @@ export default function App() {
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-h-0">
-          {/* Filters */}
-          <div className="flex border-b border-[#999] text-sm h-48 brushed-metal">
-            {[
-              {
-                title: "Genres",
-                items: getUniqueGenres(),
-                selected: filterState.selectedGenre,
-                setSelected: setSelectedGenre,
-              },
-              {
-                title: "Artists",
-                items: getUniqueArtists(),
-                selected: filterState.selectedArtist,
-                setSelected: setSelectedArtist,
-              },
-              {
-                title: "Albums",
-                items: getUniqueAlbums(),
-                selected: filterState.selectedAlbum,
-                setSelected: setSelectedAlbum,
-              },
-            ].map((section, idx) => (
-              <div
-                key={section.title}
-                className={`w-1/3 ${
-                  idx < 2 ? "border-r border-[#bbb]" : ""
-                } flex flex-col`}
-              >
-                <div className="filter-title bg-gradient-to-b from-[#f2f2f2] to-[#cfcfcf] border-b border-[#999] box-shadow-[inset_0_-1px_0_#aaa] px-4 py-2 font-bold">
-                  {section.title}
+          {showQueue ? (
+            <div className="flex-1 overflow-y-auto">
+              <QueueView />
+            </div>
+          ) : (
+            <>
+              {/* Filters */}
+              <div className="flex border-b border-[#999] text-sm h-48 brushed-metal">
+                {[
+                  {
+                    title: "Genres",
+                    items: getUniqueGenres(),
+                    selected: filterState.selectedGenre,
+                    setSelected: setSelectedGenre,
+                  },
+                  {
+                    title: "Artists",
+                    items: getUniqueArtists(),
+                    selected: filterState.selectedArtist,
+                    setSelected: setSelectedArtist,
+                  },
+                  {
+                    title: "Albums",
+                    items: getUniqueAlbums(),
+                    selected: filterState.selectedAlbum,
+                    setSelected: setSelectedAlbum,
+                  },
+                ].map((section, idx) => (
+                  <div
+                    key={section.title}
+                    className={`w-1/3 ${
+                      idx < 2 ? "border-r border-[#bbb]" : ""
+                    } flex flex-col`}
+                  >
+                    <div className="filter-title bg-gradient-to-b from-[#f2f2f2] to-[#cfcfcf] border-b border-[#999] box-shadow-[inset_0_-1px_0_#aaa] px-4 py-2 font-bold">
+                      {section.title}
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                      <ul className="flex flex-col">
+                        <li
+                          className={`cursor-pointer px-4 py-2 hover:bg-[#E6C7FF]/70 ${
+                            !section.selected ? "bg-[#E6C7FF]/70" : ""
+                          }`}
+                          onClick={() => section.setSelected(null)}
+                        >
+                          All ({section.items.length} {section.title})
+                        </li>
+                        {section.items.map((item) => (
+                          <li
+                            key={item}
+                            className={`cursor-pointer px-4 py-2 hover:bg-[#E6C7FF]/70 ${
+                              section.selected === item ? "bg-[#E6C7FF]/70" : ""
+                            }`}
+                            onClick={() => section.setSelected(item)}
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Track list */}
+              <div className="flex-1 flex flex-col brushed-metal min-h-0">
+                <div className="sticky top-0 z-10 bg-[#d0d0d0] text-left border-b border-[#aaa]">
+                  <table className="w-full text-sm table-fixed border-collapse">
+                    <thead>
+                      <tr>
+                        <th
+                          className="px-4 py-2 cursor-pointer"
+                          onClick={toggleSort}
+                        >
+                          Title {filterState.sortAsc ? "↑" : "↓"}
+                        </th>
+                        <th className="px-4 py-2">Artist</th>
+                        <th className="px-4 py-2">Album</th>
+                        <th className="px-4 py-2">Genre</th>
+                        <th className="px-4 py-2 text-right">Release Date</th>
+                        <th className="px-4 py-2 text-right">Duration</th>
+                        <th className="px-4 py-2 text-right">Plays</th>
+                      </tr>
+                    </thead>
+                  </table>
                 </div>
                 <div className="flex-1 overflow-y-auto">
-                  <ul className="flex flex-col">
-                    <li
-                      className={`cursor-pointer px-4 py-2 hover:bg-[#E6C7FF]/70 ${
-                        !section.selected ? "bg-[#E6C7FF]/70" : ""
-                      }`}
-                      onClick={() => section.setSelected(null)}
-                    >
-                      All ({section.items.length} {section.title})
-                    </li>
-                    {section.items.map((item) => (
-                      <li
-                        key={item}
-                        className={`cursor-pointer px-4 py-2 hover:bg-[#E6C7FF]/70 ${
-                          section.selected === item ? "bg-[#E6C7FF]/70" : ""
-                        }`}
-                        onClick={() => section.setSelected(item)}
-                      >
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
+                  <table className="w-full text-sm table-fixed border-collapse">
+                    <tbody>
+                      {getFilteredTracks().map((track, i) => (
+                        <tr
+                          key={track.id}
+                          className={`${
+                            currentTrack?.id === track.id
+                              ? "bg-zinc-400/70"
+                              : i % 2 === 0
+                              ? "bg-zinc-100"
+                              : "bg-white"
+                          } hover:bg-[#E6C7FF]/70 cursor-pointer`}
+                          onDoubleClick={() => handleTrackClick(track)}
+                          onContextMenu={(e) => handleContextMenu(e, track)}
+                        >
+                          <td className="px-4 py-2">{track.title}</td>
+                          <td className="px-4 py-2">{track.artist}</td>
+                          <td className="px-4 py-2">{track.album}</td>
+                          <td className="px-4 py-2">{track.genre}</td>
+                          <td className="px-4 py-2 text-right">
+                            {track.releaseDate || "-"}
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            {track.duration}
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            {track.playCount?.toLocaleString() || "-"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Track list */}
-          <div className="flex-1 flex flex-col brushed-metal min-h-0">
-            <div className="sticky top-0 z-10 bg-[#d0d0d0] text-left border-b border-[#aaa]">
-              <table className="w-full text-sm table-fixed border-collapse">
-                <thead>
-                  <tr>
-                    <th
-                      className="px-4 py-2 cursor-pointer"
-                      onClick={toggleSort}
-                    >
-                      Title {filterState.sortAsc ? "↑" : "↓"}
-                    </th>
-                    <th className="px-4 py-2">Artist</th>
-                    <th className="px-4 py-2">Album</th>
-                    <th className="px-4 py-2">Genre</th>
-                    <th className="px-4 py-2 text-right">Release Date</th>
-                    <th className="px-4 py-2 text-right">Duration</th>
-                    <th className="px-4 py-2 text-right">Plays</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <table className="w-full text-sm table-fixed border-collapse">
-                <tbody>
-                  {getFilteredTracks().map((track, i) => (
-                    <tr
-                      key={track.id}
-                      className={`${
-                        currentTrack?.id === track.id
-                          ? "bg-zinc-400/70"
-                          : i % 2 === 0
-                          ? "bg-zinc-100"
-                          : "bg-white"
-                      } hover:bg-[#E6C7FF]/70 cursor-pointer`}
-                      onDoubleClick={() => handleTrackClick(track)}
-                      onContextMenu={(e) => handleContextMenu(e, track)}
-                    >
-                      <td className="px-4 py-2">{track.title}</td>
-                      <td className="px-4 py-2">{track.artist}</td>
-                      <td className="px-4 py-2">{track.album}</td>
-                      <td className="px-4 py-2">{track.genre}</td>
-                      <td className="px-4 py-2 text-right">
-                        {track.releaseDate || "-"}
-                      </td>
-                      <td className="px-4 py-2 text-right">{track.duration}</td>
-                      <td className="px-4 py-2 text-right">
-                        {track.playCount?.toLocaleString() || "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -771,6 +808,14 @@ export default function App() {
         <div className="absolute left-4 flex gap-2">
           <button className="aqua-button px-2 text-xs">🔁 Loop</button>
           <button className="aqua-button px-2 text-xs">🔀 Shuffle</button>
+          <button
+            className={`aqua-button px-2 text-xs ${
+              showQueue ? "bg-[#E6C7FF] dark:bg-[#4a1a7a]" : ""
+            }`}
+            onClick={toggleQueue}
+          >
+            ▶️ Queue
+          </button>
         </div>
         {getUserState() && `${getUserState()?.handle} - `}
         {getFilteredTracks().length} songs,{" "}

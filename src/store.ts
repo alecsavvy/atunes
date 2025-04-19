@@ -68,10 +68,13 @@ type StoreState = {
   playedTracks: Track[];
   feelingLucky: Track[];
   currentTrack: Track | null;
+  queue: Track[];
+  currentQueueIndex: number;
   playbackState: PlaybackState;
   currentTime: number;
   duration: number;
   volume: number;
+  showQueue: boolean;
   [key: string]:
     | Track[]
     | FilterState
@@ -107,6 +110,12 @@ type StoreState = {
   setCurrentTime: (currentTime: number | ((prev: number) => number)) => void;
   setDuration: (duration: number) => void;
   setVolume: (volume: number) => void;
+  toggleQueue: () => void;
+  addToQueue: (track: Track) => void;
+  removeFromQueue: (index: number) => void;
+  clearQueue: () => void;
+  nextTrack: () => void;
+  previousTrack: () => void;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -120,10 +129,13 @@ export const useStore = create<StoreState>((set, get) => ({
   playedTracks: [],
   feelingLucky: [],
   currentTrack: null,
+  queue: [],
+  currentQueueIndex: -1,
   playbackState: PlaybackState.NO_SONG_SELECTED,
   currentTime: 0,
   duration: 0,
   volume: 1.0,
+  showQueue: false,
   filterState: {
     selectedSource: "trending",
     selectedGenre: null,
@@ -476,4 +488,43 @@ export const useStore = create<StoreState>((set, get) => ({
     })),
   setDuration: (duration) => set({ duration }),
   setVolume: (volume) => set({ volume }),
+  toggleQueue: () => set((state) => ({ showQueue: !state.showQueue })),
+  addToQueue: (track) => set((state) => ({ queue: [...state.queue, track] })),
+  removeFromQueue: (index) =>
+    set((state) => ({
+      queue: state.queue.filter((_, i) => i !== index),
+      currentQueueIndex:
+        state.currentQueueIndex > index
+          ? state.currentQueueIndex - 1
+          : state.currentQueueIndex,
+    })),
+  clearQueue: () => set({ queue: [], currentQueueIndex: -1 }),
+  nextTrack: () => {
+    const state = get();
+    if (state.currentQueueIndex < state.queue.length - 1) {
+      const nextTrack = state.queue[state.currentQueueIndex + 1];
+      set({
+        currentTrack: nextTrack,
+        currentQueueIndex: state.currentQueueIndex + 1,
+        playbackState: PlaybackState.SONG_PLAYING,
+      });
+    } else {
+      set({
+        currentTrack: null,
+        currentQueueIndex: -1,
+        playbackState: PlaybackState.NO_SONG_SELECTED,
+      });
+    }
+  },
+  previousTrack: () => {
+    const state = get();
+    if (state.currentQueueIndex > 0) {
+      const prevTrack = state.queue[state.currentQueueIndex - 1];
+      set({
+        currentTrack: prevTrack,
+        currentQueueIndex: state.currentQueueIndex - 1,
+        playbackState: PlaybackState.SONG_PLAYING,
+      });
+    }
+  },
 }));
