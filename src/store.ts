@@ -315,10 +315,10 @@ export const useStore = create<StoreState>((set, get) => {
         // Combine tracks and deduplicate by id
         const allTracks = [
           ...(get().favorites || []),
-          ...(get().uploads || []),
-          ...(get().playlists || []),
+          ...(get().mostLovedTracks || []),
           ...(get().bestNewReleases || []),
-          ...(get().feed || []),
+          ...(get().uploads || []),
+          ...(get().reposts || []),
         ];
         sourceTracks = allTracks.filter(
           (track, index, self) =>
@@ -411,10 +411,10 @@ export const useStore = create<StoreState>((set, get) => {
       } else if (filterState.selectedSource === "library") {
         sourceTracks = [
           ...(get().favorites || []),
-          ...(get().uploads || []),
-          ...(get().playlists || []),
+          ...(get().mostLovedTracks || []),
           ...(get().bestNewReleases || []),
-          ...(get().feed || []),
+          ...(get().uploads || []),
+          ...(get().reposts || []),
         ];
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
@@ -443,10 +443,10 @@ export const useStore = create<StoreState>((set, get) => {
       } else if (filterState.selectedSource === "library") {
         sourceTracks = [
           ...(get().favorites || []),
-          ...(get().uploads || []),
-          ...(get().playlists || []),
+          ...(get().mostLovedTracks || []),
           ...(get().bestNewReleases || []),
-          ...(get().feed || []),
+          ...(get().uploads || []),
+          ...(get().reposts || []),
         ];
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
@@ -475,10 +475,10 @@ export const useStore = create<StoreState>((set, get) => {
       } else if (filterState.selectedSource === "library") {
         sourceTracks = [
           ...(get().favorites || []),
-          ...(get().uploads || []),
-          ...(get().playlists || []),
+          ...(get().mostLovedTracks || []),
           ...(get().bestNewReleases || []),
-          ...(get().feed || []),
+          ...(get().uploads || []),
+          ...(get().reposts || []),
         ];
       } else {
         sourceTracks = (get()[sourceKey] || []) as Track[];
