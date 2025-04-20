@@ -308,6 +308,9 @@ export default function App() {
     shuffle,
     isDark,
     toggleTheme,
+    useLocalStorage,
+    setUseLocalStorage,
+    clearLocalStorage,
   } = useStore();
 
   const [localVolume, setLocalVolume] = useState(0.7);
@@ -1035,6 +1038,42 @@ export default function App() {
               />
             </button>
           </div>
+          <div className="flex items-center justify-between">
+            <span className={isDark ? "text-zinc-200" : "text-zinc-800"}>
+              Local Storage
+            </span>
+            <button
+              onClick={() => setUseLocalStorage(!useLocalStorage)}
+              className="relative inline-flex h-6 w-11 items-center rounded-full bg-zinc-200 dark:bg-zinc-700"
+            >
+              <span
+                className={`${
+                  useLocalStorage ? "translate-x-6" : "translate-x-1"
+                } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+              />
+            </button>
+          </div>
+          {useLocalStorage && (
+            <div className="flex items-center justify-between">
+              <span className={isDark ? "text-zinc-200" : "text-zinc-800"}>
+                Clear Local Storage
+              </span>
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to clear all saved data?"
+                    )
+                  ) {
+                    clearLocalStorage();
+                  }
+                }}
+                className="px-3 py-1 text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 border border-red-500 dark:border-red-400 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
       </Modal>
 
