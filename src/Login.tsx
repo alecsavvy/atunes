@@ -26,7 +26,7 @@ export default function Login() {
       onClick={() => audiusSdk.oauth?.login({ scope: "read" })}
       className="cursor-pointer px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
     >
-      Login with Audius
+      Login
     </button>
   );
 }
