@@ -134,6 +134,13 @@ export const fetchPlaylistsByUser = async (userId: string) => {
       const store = useStore.getState();
       const updatedSources = store.sources.map((source) => {
         if (source.id === "library") {
+          // Check if the playlist already exists
+          const existingPlaylist = source.children?.find(
+            (child) => child.id === playlistSource
+          );
+          if (existingPlaylist) {
+            return source; // Skip if already exists
+          }
           return {
             ...source,
             children: [

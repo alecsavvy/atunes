@@ -136,6 +136,7 @@ type StoreState = {
   useLocalStorage: boolean;
   setUseLocalStorage: (value: boolean) => void;
   clearLocalStorage: () => void;
+  reposts: Track[];
   [key: string]: any;
 };
 
@@ -516,6 +517,39 @@ export const useStore = create<StoreState>()(
           set((_) => ({
             [source]: tracks,
           }));
+
+          // If this is a dynamic source (like a playlist), ensure it's in the sources
+          if (source.startsWith("playlist-")) {
+            const store = get();
+            const existingSource = store.sources
+              .find((s) => s.id === "library")
+              ?.children?.find((child) => child.id === source);
+
+            if (!existingSource) {
+              // Get the playlist info from the first track
+              const firstTrack = tracks[0];
+              if (firstTrack) {
+                const playlistSource = {
+                  id: source,
+                  label: firstTrack.album || "Playlist",
+                  type: "dynamic" as const,
+                  icon: firstTrack.artwork?._150x150 || "🎵",
+                };
+
+                // Add the source to the library
+                const updatedSources = store.sources.map((s) => {
+                  if (s.id === "library") {
+                    return {
+                      ...s,
+                      children: [...(s.children || []), playlistSource],
+                    };
+                  }
+                  return s;
+                });
+                store.setSources(updatedSources);
+              }
+            }
+          }
         },
         setUserState: (userState: DecodedUserToken) => {
           set({ userState });
@@ -587,6 +621,16 @@ export const useStore = create<StoreState>()(
                       label: "🔄 Reposts",
                       type: "static" as const,
                     },
+                    // Get existing dynamic sources and deduplicate by ID
+                    ...(get()
+                      .sources.find((s) => s.id === "library")
+                      ?.children?.filter((child) => child.type === "dynamic")
+                      .reduce((acc, curr) => {
+                        if (!acc.find((item) => item.id === curr.id)) {
+                          acc.push(curr);
+                        }
+                        return acc;
+                      }, [] as SourceConfig[]) || []),
                   ]
                 : [],
             },
@@ -803,6 +847,7 @@ export const useStore = create<StoreState>()(
             mostLovedTracks: [],
             bestNewReleases: [],
             feed: [],
+            reposts: [],
             // Reset sources to initial state
             sources: [
               {
@@ -848,6 +893,7 @@ export const useStore = create<StoreState>()(
             ],
           });
         },
+        reposts: [],
       };
     },
     {
@@ -868,35 +914,24 @@ export const useStore = create<StoreState>()(
         },
       })),
       partialize: (state) => {
-        console.log("Partializing state for storage:", state);
-        return {
-          isDark: state.isDark,
-          volume: state.volume,
-          loop: state.loop,
-          shuffle: state.shuffle,
-          userState: state.userState,
-          playedTracks: state.playedTracks,
-          queue: state.queue,
-          currentQueueIndex: state.currentQueueIndex,
-          currentTrack: state.currentTrack,
-          playbackState: state.playbackState,
-          currentTime: state.currentTime,
-          duration: state.duration,
-          filterState: state.filterState,
-          useLocalStorage: state.useLocalStorage,
-          library: state.library,
-          trending: state.trending,
-          underground: state.underground,
-          favorites: state.favorites,
-          playlists: state.playlists,
-          uploads: state.uploads,
-          searches: state.searches,
-          feelingLucky: state.feelingLucky,
-          mostLovedTracks: state.mostLovedTracks,
-          bestNewReleases: state.bestNewReleases,
-          feed: state.feed,
-          sources: state.sources,
+        // Get all dynamic playlist sources
+        const playlistSources =
+          state.sources
+            .find((s) => s.id === "library")
+            ?.children?.filter((child) => child.id.startsWith("playlist-"))
+            .map((child) => child.id) || [];
+
+        // Create an object with all the state we want to persist
+        const persistedState: any = {
+          ...state,
+          // Include all playlist tracks in the persisted state
+          ...playlistSources.reduce((acc, source) => {
+            acc[source] = state[source];
+            return acc;
+          }, {} as Record<string, any>),
         };
+
+        return persistedState;
       },
       onRehydrateStorage: (state) => {
         // Sync theme with persisted state
@@ -916,6 +951,34 @@ export const useStore = create<StoreState>()(
             currentTrack: state.queue[0],
             currentQueueIndex: 0,
           });
+        }
+
+        // Re-fetch user data if we have a user state
+        if (state?.userState) {
+          const { userId } = state.userState;
+
+          // First, clear any existing dynamic sources to prevent duplicates
+          const store = useStore.getState();
+          const updatedSources = store.sources.map((source) => {
+            if (source.id === "library") {
+              return {
+                ...source,
+                children: (source.children || []).filter(
+                  (child) => child.type !== "dynamic"
+                ),
+              };
+            }
+            return source;
+          });
+          store.setSources(updatedSources);
+
+          // Then fetch fresh data
+          fetchFavoritesTracks(userId);
+          fetchPlaylistsByUser(userId);
+          fetchUploads(userId);
+          fetchBestNewReleases(userId);
+          fetchReposts(userId);
+          fetchMostLovedTracks(userId);
         }
       },
     }
