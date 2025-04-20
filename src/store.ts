@@ -151,7 +151,7 @@ export const useStore = create<StoreState>()(
       // Get persisted state if it exists
       const persistedState = localStorage.getItem("atunes-storage");
       const parsedState = persistedState ? JSON.parse(persistedState) : null;
-      const initialIsDark = parsedState?.state?.isDark ?? systemPrefersDark;
+      const initialIsDark = parsedState?.state?.isDark ?? false; // Default to light mode for new users
 
       // Set initial theme
       if (initialIsDark) {
