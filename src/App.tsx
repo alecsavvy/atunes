@@ -1086,8 +1086,12 @@ export default function App() {
                       "Are you sure you want to logout? This will clear all saved data."
                     )
                   ) {
+                    // First set theme to light mode
+                    document.documentElement.classList.remove("dark");
+                    // Then clear storage
                     clearLocalStorage();
-                    setIsSettingsOpen(false);
+                    // Finally reload the page
+                    window.location.reload();
                   }
                 }}
                 className="px-3 py-1 text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 border border-red-500 dark:border-red-400 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

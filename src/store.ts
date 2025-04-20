@@ -143,11 +143,6 @@ type StoreState = {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => {
-      // Check system preference
-      const systemPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-
       // Get persisted state if it exists
       const persistedState = localStorage.getItem("atunes-storage");
       const parsedState = persistedState ? JSON.parse(persistedState) : null;
@@ -822,10 +817,12 @@ export const useStore = create<StoreState>()(
         },
         clearLocalStorage: () => {
           console.log("Clearing local storage");
+          // First set theme to light mode
+          document.documentElement.classList.remove("dark");
           localStorage.removeItem("atunes-storage");
           // Reset state to initial values
           set({
-            isDark: systemPrefersDark,
+            isDark: false, // Explicitly set to light mode
             volume: 1.0,
             loop: true,
             shuffle: false,
@@ -858,49 +855,6 @@ export const useStore = create<StoreState>()(
             bestNewReleases: [],
             feed: [],
             reposts: [],
-            // Reset sources to initial state
-            sources: [
-              {
-                id: "discover" as const,
-                label: "🔍 Discover",
-                type: "static" as const,
-                children: [
-                  {
-                    id: "trending" as const,
-                    label: "🔥 Trending",
-                    type: "static" as const,
-                  },
-                  {
-                    id: "underground" as const,
-                    label: "🔊 Underground",
-                    type: "static" as const,
-                  },
-                  {
-                    id: "feelingLucky" as const,
-                    label: "🎲 Feeling Lucky",
-                    type: "static" as const,
-                  },
-                ],
-              },
-              {
-                id: "library" as const,
-                label: "📚 Library",
-                type: "static" as const,
-                children: [],
-              },
-              {
-                id: "recents" as const,
-                label: "⏱️ Recents",
-                type: "static" as const,
-                children: [
-                  {
-                    id: "played-tracks" as const,
-                    label: "🎵 Played Tracks",
-                    type: "static" as const,
-                  },
-                ],
-              },
-            ],
           });
         },
         reposts: [],

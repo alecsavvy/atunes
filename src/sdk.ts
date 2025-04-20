@@ -59,7 +59,9 @@ export const fetchTrendingTracks = async () => {
 export const fetchUndergroundTracks = async () => {
   try {
     const { data: tracks } =
-      await audiusSdk.tracks.getUndergroundTrendingTracks();
+      await audiusSdk.tracks.getUndergroundTrendingTracks({
+        limit: 100,
+      });
     const convertedTracks = (tracks ?? []).map((track, index) =>
       convertAudiusTrack(track, index, "underground")
     );
@@ -170,7 +172,9 @@ export const fetchPlaylistsByUser = async (userId: string) => {
 };
 
 export const fetchFeelingLuckyTracks = async () => {
-  const { data: tracks } = await audiusSdk.full.tracks.getFeelingLuckyTracks();
+  const { data: tracks } = await audiusSdk.full.tracks.getFeelingLuckyTracks({
+    limit: 100,
+  });
   const convertedTracks = (tracks ?? []).map((track, index) =>
     convertAudiusTrack(track, index, "feelingLucky")
   );
