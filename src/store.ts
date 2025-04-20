@@ -518,36 +518,46 @@ export const useStore = create<StoreState>()(
             [source]: tracks,
           }));
 
-          // If this is a dynamic source (like a playlist), ensure it's in the sources
-          if (source.startsWith("playlist-")) {
+          // If this is a dynamic source (like an album, artist, or genre), ensure it's in the sources
+          if (
+            source.startsWith("album-") ||
+            source.startsWith("artist-") ||
+            source.startsWith("genre-")
+          ) {
             const store = get();
             const existingSource = store.sources
-              .find((s) => s.id === "library")
+              .find((s) => s.id === "recents")
               ?.children?.find((child) => child.id === source);
 
             if (!existingSource) {
-              // Get the playlist info from the first track
+              // Get the source info from the first track or use the source label
               const firstTrack = tracks[0];
-              if (firstTrack) {
-                const playlistSource = {
-                  id: source,
-                  label: firstTrack.album || "Playlist",
-                  type: "dynamic" as const,
-                  icon: firstTrack.artwork?._150x150 || "🎵",
-                };
+              const sourceLabel = source.startsWith("album-")
+                ? firstTrack?.album || "Album"
+                : source.startsWith("artist-")
+                ? firstTrack?.artist || "Artist"
+                : source.startsWith("genre-")
+                ? firstTrack?.genre || "Genre"
+                : "Unknown";
 
-                // Add the source to the library
-                const updatedSources = store.sources.map((s) => {
-                  if (s.id === "library") {
-                    return {
-                      ...s,
-                      children: [...(s.children || []), playlistSource],
-                    };
-                  }
-                  return s;
-                });
-                store.setSources(updatedSources);
-              }
+              const dynamicSource = {
+                id: source,
+                label: sourceLabel,
+                type: "dynamic" as const,
+                icon: firstTrack?.artwork?._150x150 || "🎵",
+              };
+
+              // Add the source to the recents section
+              const updatedSources = store.sources.map((s) => {
+                if (s.id === "recents") {
+                  return {
+                    ...s,
+                    children: [...(s.children || []), dynamicSource],
+                  };
+                }
+                return s;
+              });
+              store.setSources(updatedSources);
             }
           }
         },

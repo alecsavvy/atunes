@@ -12,27 +12,35 @@ export const audiusSdk: AudiusSdk = window.audiusSdk({
   apiKey: audiusSdkApiKey,
 });
 
-const convertAudiusTrack = (track: Track, index: number, source: string) => ({
-  id: track.id,
-  index: index + 1,
-  title: track.title,
-  artist: track.user.name,
-  artistId: track.user.id,
-  album: track.albumBacklink?.playlistName || NO_ALBUM,
-  albumId: track.albumBacklink?.playlistId
-    ? hashids.encode(Number(track.albumBacklink.playlistId))
-    : "",
-  duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
-    .toString()
-    .padStart(2, "0")}`,
-  genre: track.genre,
-  playCount: track.playCount,
-  releaseDate: track.releaseDate
-    ? new Date(track.releaseDate).toISOString().split("T")[0]
-    : undefined,
-  source,
-  artwork: track.artwork,
-});
+const convertAudiusTrack = (track: Track, index: number, source: string) => {
+  // If this is a playlist track, use the playlist name from the source
+  const isPlaylistTrack = source.startsWith("playlist-");
+  const playlistName = isPlaylistTrack
+    ? source.replace("playlist-", "Playlist ")
+    : undefined;
+
+  return {
+    id: track.id,
+    index: index + 1,
+    title: track.title,
+    artist: track.user.name,
+    artistId: track.user.id,
+    album: playlistName || track.albumBacklink?.playlistName || NO_ALBUM,
+    albumId: track.albumBacklink?.playlistId
+      ? hashids.encode(Number(track.albumBacklink.playlistId))
+      : "",
+    duration: `${Math.floor(track.duration / 60)}:${(track.duration % 60)
+      .toString()
+      .padStart(2, "0")}`,
+    genre: track.genre,
+    playCount: track.playCount,
+    releaseDate: track.releaseDate
+      ? new Date(track.releaseDate).toISOString().split("T")[0]
+      : undefined,
+    source,
+    artwork: track.artwork,
+  };
+};
 
 export { convertAudiusTrack };
 
@@ -121,7 +129,7 @@ export const fetchPlaylistsTracks = async (playlistId: string) => {
 
 export const fetchPlaylistsByUser = async (userId: string) => {
   const playlists = await fetchPlaylists(userId);
-  Promise.all(
+  await Promise.all(
     playlists.map(async (playlist) => {
       const playlistSource = `playlist-${playlist.id}`;
       const playlistTracks = await fetchPlaylistsTracks(playlist.id);
@@ -147,7 +155,7 @@ export const fetchPlaylistsByUser = async (userId: string) => {
               ...(source.children || []),
               {
                 id: playlistSource,
-                label: playlist.playlistName,
+                label: playlist.playlistName || `Playlist ${playlist.id}`,
                 type: "dynamic" as const,
                 icon: playlist.artwork ? playlist.artwork._150x150 : "🎵",
               },
