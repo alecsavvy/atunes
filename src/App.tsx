@@ -1074,6 +1074,28 @@ export default function App() {
               </button>
             </div>
           )}
+          {getUserState() && (
+            <div className="flex items-center justify-between">
+              <span className={isDark ? "text-zinc-200" : "text-zinc-800"}>
+                Logout
+              </span>
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to logout? This will clear all saved data."
+                    )
+                  ) {
+                    clearLocalStorage();
+                    setIsSettingsOpen(false);
+                  }
+                }}
+                className="px-3 py-1 text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 border border-red-500 dark:border-red-400 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </Modal>
 
@@ -1262,12 +1284,26 @@ export default function App() {
 
               {/* Track list */}
               <div className="flex-1 flex flex-col brushed-metal min-h-0">
-                <div className="sticky top-0 z-10 bg-[#d0d0d0] text-left border-b border-[#aaa]">
+                <div
+                  className={`sticky top-0 z-10 ${
+                    isDark ? "bg-zinc-800" : "bg-[#d0d0d0]"
+                  } text-left border-b ${
+                    isDark ? "border-zinc-700" : "border-[#aaa]"
+                  } shadow-inner`}
+                >
                   <table className="w-full text-sm table-fixed border-collapse">
                     <thead>
-                      <tr>
+                      <tr
+                        className={`${
+                          isDark ? "bg-zinc-800" : "bg-[#d0d0d0]"
+                        } text-left`}
+                      >
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("title")}
                         >
                           Title{" "}
@@ -1279,7 +1315,11 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("artist")}
                         >
                           Artist{" "}
@@ -1291,7 +1331,11 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("album")}
                         >
                           Album{" "}
@@ -1303,7 +1347,11 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("genre")}
                         >
                           Genre{" "}
@@ -1315,7 +1363,11 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 text-right cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("releaseDate")}
                         >
                           Release Date{" "}
@@ -1327,7 +1379,11 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 text-right cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("duration")}
                         >
                           Duration{" "}
@@ -1339,7 +1395,11 @@ export default function App() {
                               : "")}
                         </th>
                         <th
-                          className="px-4 py-2 text-right cursor-pointer hover:bg-[#E6C7FF]/10 dark:hover:bg-zinc-600/20 transition-colors"
+                          className={`px-4 py-2 text-right cursor-pointer ${
+                            isDark
+                              ? "text-zinc-200 hover:bg-zinc-700"
+                              : "text-zinc-800 hover:bg-zinc-200"
+                          } transition-colors`}
                           onClick={() => toggleSort("playCount")}
                         >
                           Plays{" "}
@@ -1376,17 +1436,53 @@ export default function App() {
                           onDoubleClick={() => handleTrackClick(track)}
                           onContextMenu={(e) => handleContextMenu(e, track)}
                         >
-                          <td className="px-4 py-2">{track.title}</td>
-                          <td className="px-4 py-2">{track.artist}</td>
-                          <td className="px-4 py-2">{track.album}</td>
-                          <td className="px-4 py-2">{track.genre}</td>
-                          <td className="px-4 py-2 text-right">
+                          <td
+                            className={`px-4 py-2 ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
+                            {track.title}
+                          </td>
+                          <td
+                            className={`px-4 py-2 ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
+                            {track.artist}
+                          </td>
+                          <td
+                            className={`px-4 py-2 ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
+                            {track.album}
+                          </td>
+                          <td
+                            className={`px-4 py-2 ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
+                            {track.genre}
+                          </td>
+                          <td
+                            className={`px-4 py-2 text-right ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
                             {track.releaseDate || "-"}
                           </td>
-                          <td className="px-4 py-2 text-right">
+                          <td
+                            className={`px-4 py-2 text-right ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
                             {track.duration}
                           </td>
-                          <td className="px-4 py-2 text-right">
+                          <td
+                            className={`px-4 py-2 text-right ${
+                              isDark ? "text-zinc-200" : "text-zinc-800"
+                            }`}
+                          >
                             {track.playCount?.toLocaleString() || "-"}
                           </td>
                         </tr>

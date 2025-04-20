@@ -147,31 +147,30 @@ export const useStore = create<StoreState>()(
         "(prefers-color-scheme: dark)"
       ).matches;
 
-      // Log when store is initialized
-      console.log(
-        "Store initialized with system dark mode preference:",
-        systemPrefersDark
-      );
+      // Get persisted state if it exists
+      const persistedState = localStorage.getItem("atunes-storage");
+      const parsedState = persistedState ? JSON.parse(persistedState) : null;
+      const initialIsDark = parsedState?.state?.isDark ?? systemPrefersDark;
 
-      // Set initial state
-      if (systemPrefersDark) {
+      // Set initial theme
+      if (initialIsDark) {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
 
       // Listen for system preference changes
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (e) => {
-          if (e.matches) {
-            document.documentElement.classList.add("dark");
-            set({ isDark: true });
-          } else {
-            document.documentElement.classList.remove("dark");
-            set({ isDark: false });
-          }
-        });
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+        if (e.matches) {
+          document.documentElement.classList.add("dark");
+          set({ isDark: true });
+        } else {
+          document.documentElement.classList.remove("dark");
+          set({ isDark: false });
+        }
+      };
+      mediaQuery.addEventListener("change", handleSystemThemeChange);
 
       return {
         library: [],
@@ -196,7 +195,7 @@ export const useStore = create<StoreState>()(
         showQueue: false,
         loop: true,
         shuffle: false,
-        isDark: systemPrefersDark,
+        isDark: initialIsDark,
         filterState: {
           selectedSource: "trending",
           selectedGenre: null,
@@ -792,6 +791,61 @@ export const useStore = create<StoreState>()(
               sortBy: null,
               sortAsc: null,
             },
+            // Clear all track collections
+            library: [],
+            trending: [],
+            underground: [],
+            favorites: [],
+            playlists: [],
+            uploads: [],
+            searches: [],
+            feelingLucky: [],
+            mostLovedTracks: [],
+            bestNewReleases: [],
+            feed: [],
+            // Reset sources to initial state
+            sources: [
+              {
+                id: "discover" as const,
+                label: "🔍 Discover",
+                type: "static" as const,
+                children: [
+                  {
+                    id: "trending" as const,
+                    label: "🔥 Trending",
+                    type: "static" as const,
+                  },
+                  {
+                    id: "underground" as const,
+                    label: "🔊 Underground",
+                    type: "static" as const,
+                  },
+                  {
+                    id: "feelingLucky" as const,
+                    label: "🎲 Feeling Lucky",
+                    type: "static" as const,
+                  },
+                ],
+              },
+              {
+                id: "library" as const,
+                label: "📚 Library",
+                type: "static" as const,
+                children: [],
+              },
+              {
+                id: "recents" as const,
+                label: "⏱️ Recents",
+                type: "static" as const,
+                children: [
+                  {
+                    id: "played-tracks" as const,
+                    label: "🎵 Played Tracks",
+                    type: "static" as const,
+                  },
+                ],
+              },
+            ],
           });
         },
       };
@@ -843,6 +897,26 @@ export const useStore = create<StoreState>()(
           feed: state.feed,
           sources: state.sources,
         };
+      },
+      onRehydrateStorage: (state) => {
+        // Sync theme with persisted state
+        if (state?.isDark !== undefined) {
+          if (state.isDark) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        }
+
+        // Set playback state and current track if there's a queue
+        if (state?.queue && state.queue.length > 0) {
+          useStore.setState({
+            playbackState: PlaybackState.SONG_PAUSED,
+            currentTime: 0,
+            currentTrack: state.queue[0],
+            currentQueueIndex: 0,
+          });
+        }
       },
     }
   )
