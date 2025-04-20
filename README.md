@@ -1,54 +1,84 @@
-# React + TypeScript + Vite
+# aTunes - iTunes-Style Audius Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+aTunes is a modern web application that provides an iTunes-like interface for the Audius music streaming platform. It combines the familiar iTunes aesthetic with the decentralized music streaming capabilities of Audius.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎵 **iTunes-Style Interface**: Classic brushed metal design with familiar controls and layout
+- 🎧 **Music Streaming**: Stream music directly from Audius
+- 🔍 **Music Discovery**: Browse trending, underground, and feeling lucky tracks
+- 📚 **Library Management**: Access your favorites, uploads, and playlists
+- 🎨 **Dark Mode**: Toggle between light and dark themes
+- 🔄 **Queue Management**: Add tracks to queue, reorder, and manage playback
+- 🎮 **Playback Controls**: Play/pause, next/previous, volume control, and scrubbing
+- 🔀 **Playback Modes**: Loop and shuffle functionality
+- 👤 **User Authentication**: Login with Audius account
+- 📱 **Responsive Design**: Works across different screen sizes
 
-## Expanding the ESLint configuration
+## Technical Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React with TypeScript
+- **State Management**: Zustand
+- **Styling**: Tailwind CSS
+- **Audio Player**: react-h5-audio-player
+- **API Integration**: Audius SDK
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Getting Started
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm start
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Structure
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- `src/App.tsx`: Main application component
+- `src/store.ts`: Global state management
+- `src/sdk.ts`: Audius API integration
+- `src/components/`: Reusable UI components
+- `src/assets/`: Static assets
+
+## Features in Detail
+
+### Music Discovery
+
+- Browse trending tracks
+- Explore underground music
+- Get random recommendations with "Feeling Lucky"
+- View best new releases
+
+### Library Management
+
+- Access your favorite tracks
+- View your uploads
+- Manage playlists
+- Track your recently played songs
+
+### Playback Features
+
+- Queue management with drag-and-drop reordering
+- Loop and shuffle modes
+- Volume control
+- Track scrubbing
+- Play/pause and skip controls
+
+### User Experience
+
+- Dark/light theme toggle
+- Responsive design
+- Context menu for track actions
+- Track information display
+- Album artwork support
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
