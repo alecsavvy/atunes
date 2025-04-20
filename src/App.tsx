@@ -526,6 +526,12 @@ export default function App() {
   const handleSourceClick = (sourceId: string) => {
     setSelectedSource(sourceId);
 
+    // If clicking on library and not logged in, trigger OAuth login
+    if (sourceId === "library" && !getUserState()) {
+      audiusSdk.oauth?.login({ scope: "read" });
+      return;
+    }
+
     // Fetch new data based on the selected source
     switch (sourceId) {
       case "trending":

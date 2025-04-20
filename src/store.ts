@@ -420,7 +420,9 @@ export const useStore = create<StoreState>((set, get) => {
         sourceTracks = (get()[sourceKey] || []) as Track[];
       }
 
-      return [...new Set(sourceTracks.map((track) => track.genre))];
+      return [...new Set(sourceTracks.map((track) => track.genre))].filter(
+        (genre) => genre && genre.trim() !== ""
+      );
     },
     getUniqueArtists: () => {
       const { filterState } = get();
@@ -452,7 +454,9 @@ export const useStore = create<StoreState>((set, get) => {
         sourceTracks = (get()[sourceKey] || []) as Track[];
       }
 
-      return [...new Set(sourceTracks.map((track) => track.artist))];
+      return [...new Set(sourceTracks.map((track) => track.artist))].filter(
+        (artist) => artist && artist.trim() !== ""
+      );
     },
     getUniqueAlbums: () => {
       const { filterState } = get();
@@ -484,7 +488,9 @@ export const useStore = create<StoreState>((set, get) => {
         sourceTracks = (get()[sourceKey] || []) as Track[];
       }
 
-      return [...new Set(sourceTracks.map((track) => track.album))];
+      return [...new Set(sourceTracks.map((track) => track.album))].filter(
+        (album) => album && album.trim() !== ""
+      );
     },
     setTracks: (source, tracks) => {
       // Clear any existing tracks for this source before setting new ones
