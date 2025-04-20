@@ -75,6 +75,15 @@ type SourceConfig = {
   icon?: string;
 };
 
+interface RecentSource {
+  tracks: Track[];
+  source: string;
+}
+
+interface Recents {
+  [key: string]: RecentSource;
+}
+
 type StoreState = {
   library: Track[];
   trending: Track[];
@@ -137,6 +146,7 @@ type StoreState = {
   setUseLocalStorage: (value: boolean) => void;
   clearLocalStorage: () => void;
   reposts: Track[];
+  recents: Recents;
   [key: string]: any;
 };
 
@@ -146,27 +156,7 @@ export const useStore = create<StoreState>()(
       // Get persisted state if it exists
       const persistedState = localStorage.getItem("atunes-storage");
       const parsedState = persistedState ? JSON.parse(persistedState) : null;
-      const initialIsDark = parsedState?.state?.isDark ?? false; // Default to light mode for new users
-
-      // Set initial theme
-      if (initialIsDark) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-
-      // Listen for system preference changes
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-        if (e.matches) {
-          document.documentElement.classList.add("dark");
-          set({ isDark: true });
-        } else {
-          document.documentElement.classList.remove("dark");
-          set({ isDark: false });
-        }
-      };
-      mediaQuery.addEventListener("change", handleSystemThemeChange);
+      const initialIsDark = parsedState?.state?.isDark ?? false;
 
       return {
         library: [],
@@ -243,6 +233,12 @@ export const useStore = create<StoreState>()(
             ],
           },
         ],
+        recents: {
+          "played-tracks": {
+            tracks: [],
+            source: "Played Tracks",
+          },
+        },
         setSelectedSource: (source) =>
           set((state) => ({
             filterState: { ...state.filterState, selectedSource: source },
@@ -331,6 +327,14 @@ export const useStore = create<StoreState>()(
               (track, index, self) =>
                 index === self.findIndex((t) => t.id === track.id)
             );
+          } else if (
+            filterState.selectedSource.startsWith("Artist:") ||
+            filterState.selectedSource.startsWith("Genre:") ||
+            filterState.selectedSource.startsWith("Album:")
+          ) {
+            // Get tracks from recents
+            sourceTracks =
+              get().recents[filterState.selectedSource]?.tracks || [];
           } else {
             sourceTracks = (get()[sourceKey] || []) as Track[];
           }
@@ -504,57 +508,37 @@ export const useStore = create<StoreState>()(
           );
         },
         setTracks: (source, tracks) => {
-          // Clear any existing tracks for this source before setting new ones
-          set((_) => ({
-            [source]: [],
-          }));
-          // Then set the new tracks
-          set((_) => ({
-            [source]: tracks,
-          }));
-
-          // If this is a dynamic source (like an album, artist, or genre), ensure it's in the sources
-          if (
-            source.startsWith("album-") ||
-            source.startsWith("artist-") ||
-            source.startsWith("genre-")
-          ) {
-            const store = get();
-            const existingSource = store.sources
-              .find((s) => s.id === "recents")
-              ?.children?.find((child) => child.id === source);
-
-            if (!existingSource) {
-              // Get the source info from the first track or use the source label
-              const firstTrack = tracks[0];
-              const sourceLabel = source.startsWith("album-")
-                ? firstTrack?.album || "Album"
-                : source.startsWith("artist-")
-                ? firstTrack?.artist || "Artist"
-                : source.startsWith("genre-")
-                ? firstTrack?.genre || "Genre"
-                : "Unknown";
-
-              const dynamicSource = {
-                id: source,
-                label: sourceLabel,
-                type: "dynamic" as const,
-                icon: firstTrack?.artwork?._150x150 || "🎵",
+          set((state) => {
+            // Add to recents if it's a dynamic source
+            if (
+              source.startsWith("Artist:") ||
+              source.startsWith("Genre:") ||
+              source.startsWith("Album:")
+            ) {
+              const recents = state.recents || {};
+              const playedTracks = recents["played-tracks"] || {
+                tracks: [],
+                source: "Played Tracks",
               };
+              const newRecents: Recents = {};
 
-              // Add the source to the recents section
-              const updatedSources = store.sources.map((s) => {
-                if (s.id === "recents") {
-                  return {
-                    ...s,
-                    children: [...(s.children || []), dynamicSource],
-                  };
+              // Add "Played Tracks" first to ensure it's at the top
+              newRecents["played-tracks"] = playedTracks;
+
+              // Then add the new source
+              newRecents[source] = { tracks, source };
+
+              // Add any other recent sources
+              Object.entries(recents).forEach(([key, value]) => {
+                if (key !== "played-tracks" && key !== source) {
+                  newRecents[key] = value;
                 }
-                return s;
               });
-              store.setSources(updatedSources);
+
+              return { [source]: tracks, recents: newRecents };
             }
-          }
+            return { [source]: tracks };
+          });
         },
         setUserState: (userState: DecodedUserToken) => {
           set({ userState });
@@ -855,6 +839,7 @@ export const useStore = create<StoreState>()(
             bestNewReleases: [],
             feed: [],
             reposts: [],
+            recents: {},
           });
         },
         reposts: [],
@@ -893,6 +878,19 @@ export const useStore = create<StoreState>()(
             acc[source] = state[source];
             return acc;
           }, {} as Record<string, any>),
+          // Exclude recents section and its children from persistence
+          sources: state.sources.map((source) => {
+            if (source.id === "recents") {
+              return {
+                ...source,
+                children:
+                  source.children?.filter(
+                    (child) => child.id === "played-tracks"
+                  ) || [],
+              };
+            }
+            return source;
+          }),
         };
 
         return persistedState;

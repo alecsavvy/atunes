@@ -64,18 +64,26 @@ const ContextMenu = ({
     const store = useStore.getState();
     const updatedSources = store.sources.map((source) => {
       if (source.id === "recents") {
-        return {
-          ...source,
-          children: [
-            {
-              id: sourceId,
-              label: `Artist: ${track.artist}`,
-              type: "dynamic" as const,
-              icon: track.artwork ? track.artwork._150x150 : "🎵",
-            },
-            ...(source.children || []),
-          ],
-        };
+        // Check if source already exists
+        const existingSourceIndex = source.children?.findIndex(
+          (child) => child.id === sourceId
+        );
+
+        if (existingSourceIndex === -1) {
+          // If source doesn't exist, add it
+          return {
+            ...source,
+            children: [
+              {
+                id: sourceId,
+                label: `Artist: ${track.artist}`,
+                type: "dynamic" as const,
+                icon: track.artwork ? track.artwork._150x150 : "🎵",
+              },
+              ...(source.children || []),
+            ],
+          };
+        }
       }
       return source;
     });
@@ -96,35 +104,30 @@ const ContextMenu = ({
     const store = useStore.getState();
     const updatedSources = store.sources.map((source) => {
       if (source.id === "recents") {
-        return {
-          ...source,
-          children: [
-            {
-              id: sourceId,
-              label: `Genre: ${track.genre}`,
-              type: "dynamic" as const,
-              icon: track.artwork ? track.artwork._150x150 : "🎵",
-            },
-            ...(source.children || []),
-          ],
-        };
+        // Check if source already exists
+        const existingSourceIndex = source.children?.findIndex(
+          (child) => child.id === sourceId
+        );
+
+        if (existingSourceIndex === -1) {
+          // If source doesn't exist, add it
+          return {
+            ...source,
+            children: [
+              {
+                id: sourceId,
+                label: `Genre: ${track.genre}`,
+                type: "dynamic" as const,
+                icon: track.artwork ? track.artwork._150x150 : "🎵",
+              },
+              ...(source.children || []),
+            ],
+          };
+        }
       }
       return source;
     });
     store.setSources(updatedSources);
-    onClose();
-  };
-
-  const handlePlay = () => {
-    setCurrentTrack(track);
-    setAudioSource(null); // Reset audio source to trigger new URL fetch
-    setCurrentTime(0);
-    setPlaybackState(PlaybackState.SONG_PLAYING);
-    onClose();
-  };
-
-  const handleAddToQueue = () => {
-    addToQueue(track);
     onClose();
   };
 
@@ -142,22 +145,43 @@ const ContextMenu = ({
     const store = useStore.getState();
     const updatedSources = store.sources.map((source) => {
       if (source.id === "recents") {
-        return {
-          ...source,
-          children: [
-            {
-              id: sourceId,
-              label: `Album: ${track.album}`,
-              type: "dynamic" as const,
-              icon: track.artwork ? track.artwork._150x150 : "🎵",
-            },
-            ...(source.children || []),
-          ],
-        };
+        // Check if source already exists
+        const existingSourceIndex = source.children?.findIndex(
+          (child) => child.id === sourceId
+        );
+
+        if (existingSourceIndex === -1) {
+          // If source doesn't exist, add it
+          return {
+            ...source,
+            children: [
+              {
+                id: sourceId,
+                label: `Album: ${track.album}`,
+                type: "dynamic" as const,
+                icon: track.artwork ? track.artwork._150x150 : "🎵",
+              },
+              ...(source.children || []),
+            ],
+          };
+        }
       }
       return source;
     });
     store.setSources(updatedSources);
+    onClose();
+  };
+
+  const handlePlay = () => {
+    setCurrentTrack(track);
+    setAudioSource(null); // Reset audio source to trigger new URL fetch
+    setCurrentTime(0);
+    setPlaybackState(PlaybackState.SONG_PLAYING);
+    onClose();
+  };
+
+  const handleAddToQueue = () => {
+    addToQueue(track);
     onClose();
   };
 
@@ -191,20 +215,20 @@ const ContextMenu = ({
           className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
           onClick={handleViewArtist}
         >
-          View Artist: {track.artist}
+          View {track.artist}
         </div>
         <div
           className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
           onClick={handleViewGenre}
         >
-          View Genre: {track.genre}
+          View {track.genre}
         </div>
         {track.album !== NO_ALBUM && (
           <div
             className="px-4 py-2 hover:bg-[#E6C7FF] dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200"
             onClick={handleViewAlbum}
           >
-            View Album: {track.album}
+            View {track.album}
           </div>
         )}
       </div>
